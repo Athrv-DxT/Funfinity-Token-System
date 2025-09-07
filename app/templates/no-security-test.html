@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>No Security QR Test - FUNFINITY 2.0</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+    <script src="https://unpkg.com/html5-qrcode" defer></script>
+    <script src="/static/js/qr-scanner-no-security.js" defer></script>
+</head>
+<body class="page-landing">
+    <div class="wrap">
+        <h1 class="title">No Security QR Test</h1>
+        <h2 class="subtitle">Bypasses All Security Checks</h2>
+        
+        <div class="card">
+            <p><strong>This page bypasses ALL security checks to test if the camera works at all.</strong></p>
+            <p>If this works, the issue is with the security configuration in the main app.</p>
+        </div>
+        
+        <div id="qr-scanner-container"></div>
+        
+        <div class="card">
+            <h3>Test Username Input</h3>
+            <p>If QR scanning works, it should auto-fill this field:</p>
+            <input type="text" id="username" placeholder="Username will appear here when QR is scanned" style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px;">
+        </div>
+        
+        <div class="btns">
+            <a class="btn" href="/debug/simple-camera-test">Simple Camera Test</a>
+            <a class="btn secondary" href="/">Back to Home</a>
+        </div>
+    </div>
+
+    <script>
+        // Show environment info
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Environment Info:', {
+                protocol: location.protocol,
+                hostname: location.hostname,
+                port: location.port,
+                fullURL: location.href,
+                userAgent: navigator.userAgent.substring(0, 100) + '...'
+            });
+        });
+    </script>
+</body>
+</html>
+

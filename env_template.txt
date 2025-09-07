@@ -1,0 +1,86 @@
+# ===========================================
+# TOKEN WALLET APPLICATION - ENVIRONMENT VARIABLES
+# ===========================================
+# Copy this file to .env and fill in your actual values
+# For Railway deployment, add these as environment variables in Railway dashboard
+
+# ===========================================
+# DATABASE CONFIGURATION (PostgreSQL)
+# ===========================================
+# Option 1: Use DATABASE_URL (recommended for Railway)
+DATABASE_URL=postgresql://wallet_user:your_password@your_postgres_host:5432/token_wallet
+
+# Option 2: Use individual components (if DATABASE_URL doesn't work)
+DB_HOST=your_postgres_host
+DB_PORT=5432
+DB_NAME=token_wallet
+DB_USER=wallet_user
+DB_PASSWORD=your_password
+
+# Database connection pool settings (optimized for 250 concurrent users)
+DB_POOL_SIZE=25
+DB_MAX_OVERFLOW=50
+
+# ===========================================
+# APPLICATION SECURITY
+# ===========================================
+# IMPORTANT: Change this to a random secret key in production!
+SECRET_KEY=your_super_secret_key_change_this_in_production
+
+# ===========================================
+# ADMIN ACCOUNT SETUP
+# ===========================================
+ADMIN_USERNAME=admin
+ADMIN_EMAIL=admin@yourdomain.com
+ADMIN_PASSWORD=Admin1234
+
+# ===========================================
+# EMAIL CONFIGURATION
+# ===========================================
+# Gmail SMTP settings (recommended)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your_email@gmail.com
+SMTP_PASS=your_app_password
+FROM_EMAIL=your_email@gmail.com
+
+# Alternative SMTP providers:
+# Outlook: smtp-mail.outlook.com:587
+# Yahoo: smtp.mail.yahoo.com:587
+# Custom: your_smtp_server:port
+
+# ===========================================
+# RAILWAY DEPLOYMENT SETTINGS
+# ===========================================
+# Railway automatically sets PORT, but you can override
+PORT=8000
+
+# Gunicorn worker settings (optimized for 250 users)
+GUNICORN_WORKERS=4
+
+# Application environment
+FLASK_ENV=production
+
+# ===========================================
+# REDIS CONFIGURATION (Optional - for async tasks)
+# ===========================================
+# If you want to use Celery for async email sending
+REDIS_URL=redis://localhost:6379/0
+
+# ===========================================
+# PERFORMANCE SETTINGS
+# ===========================================
+# Memory allocation (for Railway)
+AVAILABLE_RAM_GB=2
+
+# ===========================================
+# EXAMPLE VALUES (DO NOT USE IN PRODUCTION)
+# ===========================================
+# DATABASE_URL=postgresql://wallet_user:securepass123@192.168.1.100:5432/token_wallet
+# SECRET_KEY=super-secret-key-change-this-12345
+# ADMIN_USERNAME=admin
+# ADMIN_EMAIL=admin@mycompany.com
+# ADMIN_PASSWORD=SecureAdminPass123
+# SMTP_USER=myapp@gmail.com
+# SMTP_PASS=app_password_from_gmail
+# FROM_EMAIL=myapp@gmail.com

@@ -1,0 +1,126 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Manager Dashboard</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+    <script src="/static/js/manager.js" defer></script>
+</head>
+<body style="max-width: 640px; margin: 20px auto; padding: 0 16px;">
+    <h2>Manager Dashboard</h2>
+    <form method="post" action="/auth/logout"><button>Logout</button></form>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-message flash-{{ category }}" style="
+                    padding: 15px; 
+                    margin: 20px 0; 
+                    border-radius: 5px; 
+                    font-weight: bold;
+                    {% if category == 'success' %}
+                        background: #d4edda; 
+                        color: #155724; 
+                        border: 1px solid #c3e6cb;
+                    {% elif category == 'error' or category == 'danger' %}
+                        background: #f8d7da; 
+                        color: #721c24; 
+                        border: 1px solid #f5c6cb;
+                    {% elif category == 'warning' %}
+                        background: #fff3cd; 
+                        color: #856404; 
+                        border: 1px solid #ffeaa7;
+                    {% else %}
+                        background: #d1ecf1; 
+                        color: #0c5460; 
+                        border: 1px solid #bee5eb;
+                    {% endif %}
+                ">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="card">
+        <h3>📱 QR Code Scanner</h3>
+        
+        <div id="qr-reader" style="width: 100%; max-width: 300px; margin: 10px auto; border: 2px dashed #ccc; min-height: 200px; display: flex; align-items: center; justify-content: center; background: #f9f9f9;">
+            <p style="color: #666; text-align: center;">Loading QR scanner...</p>
+        </div>
+        
+        <div style="margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: center;">
+            <button onclick="manualQRInput()" class="btn btn-secondary">Manual QR Input</button>
+            <button onclick="restartCamera()" class="btn btn-secondary">Restart Camera</button>
+            <button onclick="debugScanner()" class="btn btn-secondary">Debug Scanner</button>
+        </div>
+        
+    </div>
+
+    <div class="card">
+        <h3>💰 Update User Balance</h3>
+        <form method="post" action="/manager/update-balance" id="update-form">
+            <div class="form-group">
+                <label for="username">Username (from QR scan or manual entry):</label>
+                <input id="username" type="text" name="username" placeholder="Enter username" required>
+            </div>
+            
+            <div class="row">
+                <div class="form-group">
+                    <label for="action">Action:</label>
+                    <select name="action" id="action">
+                        <option value="add">➕ Add Amount</option>
+                        <option value="deduct">➖ Deduct Amount</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="amount">Amount:</label>
+                    <input type="number" name="amount" id="amount" min="1" step="1" placeholder="Enter amount" required>
+                    <small style="color: #666; font-size: 0.9em;">Minimum amount: 1</small>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-success">Update Balance</button>
+        </form>
+    </div>
+
+    <script>
+        // Add form validation for manager balance updates
+        document.addEventListener('DOMContentLoaded', function() {
+            const updateForm = document.getElementById('update-form');
+            if (updateForm) {
+                updateForm.addEventListener('submit', function(e) {
+                    const username = document.getElementById('username').value.trim();
+                    const action = document.getElementById('action').value;
+                    const amount = parseInt(document.getElementById('amount').value);
+                    
+                    if (!username) {
+                        alert('Please enter a username');
+                        e.preventDefault();
+                        return false;
+                    }
+                    
+                    if (isNaN(amount) || amount < 1) {
+                        alert('Please enter a valid amount (minimum 1)');
+                        e.preventDefault();
+                        return false;
+                    }
+                    
+                    // For deductions, show a warning
+                    if (action === 'deduct') {
+                        const confirmMessage = `You are about to deduct ${amount} tokens from ${username}.\n\nThis operation will be rejected if the user has insufficient funds.\n\nContinue?`;
+                        if (!confirm(confirmMessage)) {
+                            e.preventDefault();
+                            return false;
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>
+
+

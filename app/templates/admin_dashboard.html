@@ -1,0 +1,419 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+    <style>
+        .admin-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 16px;
+        }
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+        }
+        .admin-nav {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .nav-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .nav-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+            border-color: #667eea;
+        }
+        .nav-card.active {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+        .nav-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .nav-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .nav-desc {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .content-section {
+            display: none;
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .content-section.active {
+            display: block;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #5a6fd8;
+        }
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #218838;
+        }
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .users-table th, .users-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .users-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .users-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        .role-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        .role-admin {
+            background: #dc3545;
+            color: white;
+        }
+        .role-manager {
+            background: #ffc107;
+            color: #212529;
+        }
+        .role-user {
+            background: #28a745;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <div>
+                <h1>🔧 Admin Dashboard</h1>
+                <p>Manage users, roles, and system settings</p>
+            </div>
+            <form method="post" action="/auth/logout" style="margin: 0;">
+                <button type="submit" class="btn btn-secondary">Logout</button>
+            </form>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}" style="
+                        padding: 15px; 
+                        margin: 20px 0; 
+                        border-radius: 5px; 
+                        font-weight: bold;
+                        {% if category == 'success' %}
+                            background: #d4edda; 
+                            color: #155724; 
+                            border: 1px solid #c3e6cb;
+                        {% elif category == 'error' or category == 'danger' %}
+                            background: #f8d7da; 
+                            color: #721c24; 
+                            border: 1px solid #f5c6cb;
+                        {% elif category == 'warning' %}
+                            background: #fff3cd; 
+                            color: #856404; 
+                            border: 1px solid #ffeaa7;
+                        {% else %}
+                            background: #d1ecf1; 
+                            color: #0c5460; 
+                            border: 1px solid #bee5eb;
+                        {% endif %}
+                    ">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="admin-nav">
+            <div class="nav-card" onclick="showSection('balance', this)">
+                <div class="nav-icon">💰</div>
+                <div class="nav-title">Update Balance</div>
+                <div class="nav-desc">Modify user token balances</div>
+            </div>
+            <div class="nav-card" onclick="showSection('role', this)">
+                <div class="nav-icon">👤</div>
+                <div class="nav-title">Set Role</div>
+                <div class="nav-desc">Change user permissions</div>
+            </div>
+            <div class="nav-card" onclick="showSection('bulk', this)">
+                <div class="nav-icon">📊</div>
+                <div class="nav-title">Bulk Import</div>
+                <div class="nav-desc">Import users from Excel</div>
+            </div>
+            <div class="nav-card" onclick="showSection('users', this)">
+                <div class="nav-icon">👥</div>
+                <div class="nav-title">Current Users</div>
+                <div class="nav-desc">View all system users</div>
+            </div>
+        </div>
+
+        <!-- Balance Update Section -->
+        <div id="balance-section" class="content-section">
+            <h3>💰 Update User Balance</h3>
+            <form method="post" action="/admin/update-balance" id="admin-balance-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="username">Username:</label>
+                        <input id="username" type="text" name="username" placeholder="Enter username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="delta">Balance Change:</label>
+                        <input type="number" name="delta" id="delta" placeholder="e.g., 20 or -10" required>
+                        <small style="color: #666; font-size: 0.9em;">Positive to add, negative to deduct</small>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Update Balance</button>
+            </form>
+        </div>
+
+        <!-- Role Change Section -->
+        <div id="role-section" class="content-section">
+            <h3>👤 Change User Role</h3>
+            <form method="post" action="/admin/set-role">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="role-username">Username:</label>
+                        <input id="role-username" type="text" name="username" placeholder="Enter username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="role">New Role:</label>
+                        <select name="role" id="role">
+                            <option value="user">User</option>
+                            <option value="manager">Manager</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Update Role</button>
+            </form>
+        </div>
+
+        <!-- Bulk Import Section -->
+        <div id="bulk-section" class="content-section">
+            <h3>📊 Bulk Import Users</h3>
+            <p>Upload an Excel file with Name and Email columns to create multiple users at once.</p>
+            <form method="post" action="/admin/bulk-import" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="file">Excel File (.xlsx or .xls):</label>
+                    <input type="file" name="file" accept=".xlsx,.xls" required>
+                </div>
+                <button type="submit" class="btn btn-success">Upload and Preview</button>
+            </form>
+            <div style="margin-top: 20px; padding: 15px; background: #e7f3ff; border-radius: 5px;">
+                <strong>📋 Excel Format Required:</strong><br>
+                • Column A: Name (e.g., "John Doe")<br>
+                • Column B: Email (e.g., "john@example.com")<br>
+                • First row should be headers, data starts from row 2
+            </div>
+        </div>
+
+        <!-- Current Users Section -->
+        <div id="users-section" class="content-section">
+            <h3>👥 Current Users</h3>
+            <p>View and manage all users in the system.</p>
+            <div id="users-table-container">
+                <p>Loading users...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showSection(sectionName, clickedElement = null) {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remove active class from all nav cards
+            document.querySelectorAll('.nav-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionName + '-section').classList.add('active');
+            
+            // Add active class to clicked nav card if provided
+            if (clickedElement) {
+                clickedElement.classList.add('active');
+            }
+            
+            // Load users if users section is selected
+            if (sectionName === 'users') {
+                loadUsers();
+            }
+        }
+
+        function loadUsers() {
+            fetch('/debug/users')
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('users-table-container');
+                    if (data.users && data.users.length > 0) {
+                        let html = `
+                            <table class="users-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Username</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Balance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                        `;
+                        
+                        data.users.forEach(user => {
+                            const roleClass = user.role === 'admin' ? 'role-admin' : 
+                                           user.role === 'manager' ? 'role-manager' : 'role-user';
+                            html += `
+                                <tr>
+                                    <td>${user.id}</td>
+                                    <td>${user.username}</td>
+                                    <td>${user.email || 'No email'}</td>
+                                    <td><span class="role-badge ${roleClass}">${user.role}</span></td>
+                                    <td>${user.balance || 0} tokens</td>
+                                </tr>
+                            `;
+                        });
+                        
+                        html += '</tbody></table>';
+                        container.innerHTML = html;
+                    } else {
+                        container.innerHTML = '<p>No users found.</p>';
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('users-table-container').innerHTML = 
+                        '<p style="color: red;">Error loading users: ' + error.message + '</p>';
+                });
+        }
+
+        // Show balance section by default
+        document.addEventListener('DOMContentLoaded', function() {
+            showSection('balance');
+            
+            // Add form validation for balance updates
+            const adminBalanceForm = document.getElementById('admin-balance-form');
+            if (adminBalanceForm) {
+                adminBalanceForm.addEventListener('submit', function(e) {
+                    const delta = parseInt(document.getElementById('delta').value);
+                    const username = document.getElementById('username').value.trim();
+                    
+                    if (!username) {
+                        alert('Please enter a username');
+                        e.preventDefault();
+                        return false;
+                    }
+                    
+                    if (isNaN(delta) || delta === 0) {
+                        alert('Please enter a valid balance change (positive to add, negative to deduct)');
+                        e.preventDefault();
+                        return false;
+                    }
+                    
+                    // For deductions, show a warning
+                    if (delta < 0) {
+                        const confirmMessage = `You are about to deduct ${Math.abs(delta)} tokens from ${username}.\n\nThis operation will be rejected if the user has insufficient funds.\n\nContinue?`;
+                        if (!confirm(confirmMessage)) {
+                            e.preventDefault();
+                            return false;
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
+
+

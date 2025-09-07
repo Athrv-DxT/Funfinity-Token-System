@@ -1,0 +1,99 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bulk Import Preview</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body style="max-width: 1200px; margin: 20px auto; padding: 0 16px;">
+    <h2>📊 Bulk Import Preview</h2>
+    <a href="/dashboard" class="btn btn-secondary">← Back to Dashboard</a>
+
+    <div class="card">
+        <h3>👥 Participants List</h3>
+        <p>Review the generated credentials before sending emails:</p>
+        
+        <div style="overflow-x: auto; margin: 20px 0;">
+            <table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
+                <thead>
+                    <tr style="background-color: #f8f9fa;">
+                        <th style="padding: 12px; border: 1px solid #ddd; text-align: left;">Name</th>
+                        <th style="padding: 12px; border: 1px solid #ddd; text-align: left;">Email</th>
+                        <th style="padding: 12px; border: 1px solid #ddd; text-align: left;">Username</th>
+                        <th style="padding: 12px; border: 1px solid #ddd; text-align: left;">Password</th>
+                        <th style="padding: 12px; border: 1px solid #ddd; text-align: left;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for participant in participants %}
+                    <tr style="background-color: {% if participant.exists %}#fff3cd{% else %}#ffffff{% endif %};">
+                        <td style="padding: 12px; border: 1px solid #ddd;">{{ participant.name }}</td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">{{ participant.email or 'No email' }}</td>
+                        <td style="padding: 12px; border: 1px solid #ddd; font-family: monospace;">{{ participant.username }}</td>
+                        <td style="padding: 12px; border: 1px solid #ddd; font-family: monospace;">{{ participant.password }}</td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">
+                            {% if participant.exists %}
+                                <span style="color: #856404; font-weight: bold;">⚠️ Already Exists</span>
+                            {% else %}
+                                <span style="color: #28a745; font-weight: bold;">✅ Ready</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div style="margin-top: 20px; padding: 15px; background: #e7f3ff; border-radius: 5px;">
+            <strong>Summary:</strong><br>
+            • Total participants: {{ participants|length }}<br>
+            • New users to create: {{ participants|selectattr('exists', 'equalto', false)|list|length }}<br>
+            • Already existing: {{ participants|selectattr('exists', 'equalto', true)|list|length }}<br>
+            • Emails to send: {{ participants|selectattr('email')|selectattr('exists', 'equalto', false)|list|length }}
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>📧 Send Emails</h3>
+        <p>Click the button below to create accounts and send credentials via email:</p>
+        
+        <form method="post" action="/admin/bulk-import-confirm" id="confirmForm">
+            {% for participant in participants %}
+            <input type="hidden" name="participants" value='{{ participant|tojson }}'>
+            {% endfor %}
+            <button type="submit" class="btn btn-success" onclick="return confirm('Are you sure you want to create accounts and send emails? This action cannot be undone.')">
+                📧 Send Emails & Create Accounts
+            </button>
+        </form>
+        
+        <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-radius: 5px; font-size: 14px; color: #856404;">
+            <strong>⚠️ Important:</strong><br>
+            • This will create user accounts in the database<br>
+            • Emails will be sent to all participants with valid email addresses<br>
+            • Users who already exist will be skipped<br>
+            • This action cannot be undone
+        </div>
+    </div>
+
+    <script>
+        // Add some JavaScript for better UX
+        document.getElementById('confirmForm').addEventListener('submit', function(e) {
+            const newUsers = {{ participants|selectattr('exists', 'equalto', false)|list|length }};
+            const emailsToSend = {{ participants|selectattr('email')|selectattr('exists', 'equalto', false)|list|length }};
+            
+            if (newUsers === 0) {
+                alert('No new users to create. All participants already exist in the system.');
+                e.preventDefault();
+                return false;
+            }
+            
+            const confirmMessage = `You are about to:\n• Create ${newUsers} new user accounts\n• Send ${emailsToSend} emails with credentials\n\nAre you sure you want to continue?`;
+            
+            if (!confirm(confirmMessage)) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    </script>
+</body>
+</html>

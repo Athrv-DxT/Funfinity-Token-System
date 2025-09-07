@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mobile Access - Token Wallet</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .qr-section {
+            text-align: center;
+            margin: 20px 0;
+            padding: 20px;
+            background: #e7f3ff;
+            border-radius: 8px;
+        }
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            margin: 10px auto;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+        }
+        .url-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .url-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        .instructions {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .step {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 Mobile Access</h1>
+        <p>Access the Token Wallet app from your mobile device</p>
+        
+        <div class="instructions">
+            <h3>📋 How to Connect:</h3>
+            <div class="step">
+                <strong>Step 1:</strong> Make sure your phone is on the same WiFi network as this computer
+            </div>
+            <div class="step">
+                <strong>Step 2:</strong> Use one of the methods below to access the app
+            </div>
+            <div class="step">
+                <strong>Step 3:</strong> Allow camera permissions when prompted for QR scanning
+            </div>
+        </div>
+        
+        <div class="url-section">
+            <h3>🌐 Direct Access</h3>
+            <p>Copy and paste this URL in your mobile browser:</p>
+            <input type="text" class="url-input" id="mobile-url" value="http://10.223.248.99:5000" readonly>
+            <button class="btn btn-primary" onclick="copyUrl()">📋 Copy URL</button>
+        </div>
+        
+        <div class="qr-section">
+            <h3>📱 QR Code Access</h3>
+            <p>Scan this QR code with your phone's camera:</p>
+            <div class="qr-code" id="qr-container">
+                <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666;">
+                    Loading QR code...
+                </div>
+            </div>
+            <p><small>The QR code contains the app URL</small></p>
+        </div>
+        
+        <div class="instructions">
+            <h3>🔧 Troubleshooting:</h3>
+            <div class="step">
+                <strong>Can't access?</strong> Make sure both devices are on the same WiFi
+            </div>
+            <div class="step">
+                <strong>QR scanner not working?</strong> Allow camera permissions in your browser
+            </div>
+            <div class="step">
+                <strong>Still having issues?</strong> Try using the direct URL instead
+            </div>
+        </div>
+        
+        <button class="btn btn-success" onclick="openInNewTab()">🚀 Open App in New Tab</button>
+    </div>
+
+    <script>
+        // Generate QR code for mobile access
+        function generateQRCode() {
+            const url = 'http://10.223.248.99:5000';
+            const qrContainer = document.getElementById('qr-container');
+            
+            // Create a simple QR code using a service
+            const qrImg = document.createElement('img');
+            qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
+            qrImg.alt = 'QR Code for mobile access';
+            qrImg.style.width = '100%';
+            qrImg.style.height = '100%';
+            qrImg.style.objectFit = 'contain';
+            
+            qrContainer.innerHTML = '';
+            qrContainer.appendChild(qrImg);
+        }
+        
+        // Copy URL to clipboard
+        function copyUrl() {
+            const urlInput = document.getElementById('mobile-url');
+            urlInput.select();
+            urlInput.setSelectionRange(0, 99999); // For mobile devices
+            
+            try {
+                document.execCommand('copy');
+                alert('URL copied to clipboard!');
+            } catch (err) {
+                // Fallback for mobile
+                navigator.clipboard.writeText(urlInput.value).then(() => {
+                    alert('URL copied to clipboard!');
+                }).catch(() => {
+                    alert('Please copy the URL manually: ' + urlInput.value);
+                });
+            }
+        }
+        
+        // Open app in new tab
+        function openInNewTab() {
+            const url = document.getElementById('mobile-url').value;
+            window.open(url, '_blank');
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            generateQRCode();
+        });
+    </script>
+</body>
+</html>
