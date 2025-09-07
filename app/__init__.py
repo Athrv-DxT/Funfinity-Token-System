@@ -7,12 +7,14 @@ from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_migrate import Migrate
+from flask_caching import Cache
 
 from config import get_config
 
 db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
+cache = Cache()
 login_manager.login_view = "auth.login_page"
 login_manager.session_protection = "basic"  # Changed from "strong" for mobile compatibility
 
@@ -33,6 +35,7 @@ def create_app() -> Flask:
 	db.init_app(app)
 	migrate.init_app(app, db)
 	login_manager.init_app(app)
+	cache.init_app(app)
 
 	# Blueprints
 	from .auth import auth_bp

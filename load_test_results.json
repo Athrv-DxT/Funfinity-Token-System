@@ -1,0 +1,24 @@
+{
+  "test_summary": {
+    "total_users": 250,
+    "successful_users": 250,
+    "failed_users": 0,
+    "success_rate": 100.0,
+    "total_test_time": 20.46834921836853,
+    "total_requests": 1000,
+    "requests_per_second": 48.85591843931354
+  },
+  "response_times": {
+    "min": 0.25632143020629883,
+    "max": 19.46074891090393,
+    "average": 3.6093045449256898,
+    "median": 0.9368588924407959,
+    "p95": 16.129221200942993,
+    "p99": 18.690771102905273
+  },
+  "status_codes": {
+    "302": 250,
+    "200": 750
+  },
+  "performance_rating": "POOR - Significant improvements needed"
+}

@@ -4,7 +4,7 @@ from werkzeug.security import check_password_hash
 
 from .models import User, Role
 from .wallet import ensure_qr_for_user, change_balance
-from . import db
+from . import db, cache
 from .audit import log_event
 from .email_utils import send_credentials_email
 
@@ -46,6 +46,20 @@ def debug_users():
 def dashboard():
 	print(f"DEBUG: Dashboard accessed by user: {current_user.username}, role: {current_user.role}")
 	print(f"DEBUG: User authenticated: {current_user.is_authenticated}")
+	
+	# Cache user data for 5 minutes to reduce database queries
+	cache_key = f"user_data_{current_user.id}"
+	user_data = cache.get(cache_key)
+	
+	if not user_data:
+		user_data = {
+			'username': current_user.username,
+			'balance': current_user.balance,
+			'role': current_user.role.value,
+			'email': current_user.email
+		}
+		cache.set(cache_key, user_data, timeout=300)
+	
 	if current_user.role == Role.ADMIN:
 		return render_template("admin_dashboard.html")
 	if current_user.role == Role.MANAGER:
@@ -70,6 +84,8 @@ def admin_update_balance():
 	
 	transaction, success, message = change_balance(target, delta, reason="admin_update")
 	if success:
+		# Invalidate cache for the user whose balance was updated
+		cache.delete(f"user_data_{target.id}")
 		flash(message, "success")
 	else:
 		flash(message, "warning")
@@ -93,6 +109,8 @@ def manager_update_balance():
 	
 	transaction, success, message = change_balance(target, delta, reason=f"manager_{action}")
 	if success:
+		# Invalidate cache for the user whose balance was updated
+		cache.delete(f"user_data_{target.id}")
 		flash(message, "success")
 	else:
 		flash(message, "warning")

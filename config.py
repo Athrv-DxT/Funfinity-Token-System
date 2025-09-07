@@ -16,14 +16,18 @@ class Config:
 		DB_PASSWORD = os.environ.get("DB_PASSWORD", "password")
 		SQLALCHEMY_DATABASE_URI = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 	
-	# Optimized for 250 concurrent users
+	# Optimized for Railway free tier (250 concurrent users)
 	SQLALCHEMY_ENGINE_OPTIONS = {
 		"pool_pre_ping": True,
 		"pool_recycle": 300,
-		"pool_size": int(os.environ.get("DB_POOL_SIZE", 25)),
-		"max_overflow": int(os.environ.get("DB_MAX_OVERFLOW", 50)),
+		"pool_size": int(os.environ.get("DB_POOL_SIZE", 10)),
+		"max_overflow": int(os.environ.get("DB_MAX_OVERFLOW", 10)),
 		"pool_timeout": 30,
 		"pool_reset_on_return": "commit",
+		"connect_args": {
+			"connect_timeout": 10,
+			"application_name": "token_wallet"
+		}
 	}
 	SQLALCHEMY_TRACK_MODIFICATIONS = False
 	REMEMBER_COOKIE_SECURE = True
@@ -39,6 +43,10 @@ class Config:
 	ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
 	ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "Admin1234")
 	ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "admin@example.com")
+	
+	# Caching configuration for performance
+	CACHE_TYPE = 'simple'
+	CACHE_DEFAULT_TIMEOUT = 300
 
 
 class ProductionConfig(Config):
