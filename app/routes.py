@@ -1,6 +1,10 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash
+from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
 from flask_login import login_required, current_user
 from werkzeug.security import check_password_hash
+import psycopg2
+from sqlalchemy import text
+import os
+import time
 
 from .models import User, Role
 from .wallet import ensure_qr_for_user, change_balance
@@ -262,5 +266,174 @@ def admin_bulk_import_confirm():
 	flash(f"Created {created} users and sent {emails_sent} emails", "success")
 	log_event("admin_bulk_import", resource="users", meta=f"created={created}, emails_sent={emails_sent}")
 	return redirect(url_for("main.dashboard"))
+
+
+@main_bp.get("/admin/database-monitor")
+@login_required
+def admin_database_monitor():
+	"""Database monitoring dashboard for admin only"""
+	if current_user.role != Role.ADMIN:
+		flash("Unauthorized", "danger")
+		return redirect(url_for("main.dashboard"))
+	
+	try:
+		# Get database connection info
+		database_url = os.environ.get("DATABASE_URL")
+		if not database_url:
+			# Fallback to individual components
+			db_host = os.environ.get("DB_HOST", "localhost")
+			db_port = os.environ.get("DB_PORT", "5432")
+			db_name = os.environ.get("DB_NAME", "token_wallet")
+			db_user = os.environ.get("DB_USER", "wallet_user")
+			db_password = os.environ.get("DB_PASSWORD", "password")
+			database_url = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+		
+		# Connect to database for monitoring
+		conn = psycopg2.connect(database_url)
+		cursor = conn.cursor()
+		
+		# Get database size
+		cursor.execute("""
+			SELECT pg_size_pretty(pg_database_size(current_database())) as db_size,
+				   pg_database_size(current_database()) as db_size_bytes
+		""")
+		db_size_result = cursor.fetchone()
+		db_size_pretty = db_size_result[0] if db_size_result else "Unknown"
+		db_size_bytes = db_size_result[1] if db_size_result else 0
+		
+		# Get table sizes
+		cursor.execute("""
+			SELECT 
+				schemaname,
+				tablename,
+				pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) as size,
+				pg_total_relation_size(schemaname||'.'||tablename) as size_bytes,
+				pg_stat_get_tuples_returned(c.oid) as row_count
+			FROM pg_tables pt
+			JOIN pg_class c ON c.relname = pt.tablename
+			WHERE schemaname = 'public'
+			ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC
+		""")
+		table_sizes = cursor.fetchall()
+		
+		# Get connection info
+		cursor.execute("""
+			SELECT 
+				count(*) as total_connections,
+				count(*) FILTER (WHERE state = 'active') as active_connections,
+				count(*) FILTER (WHERE state = 'idle') as idle_connections
+			FROM pg_stat_activity 
+			WHERE datname = current_database()
+		""")
+		connection_info = cursor.fetchone()
+		
+		# Get user count
+		user_count = User.query.count()
+		
+		# Get recent activity (last 24 hours)
+		cursor.execute("""
+			SELECT 
+				date_trunc('hour', created_at) as hour,
+				count(*) as transactions
+			FROM transaction 
+			WHERE created_at >= NOW() - INTERVAL '24 hours'
+			GROUP BY date_trunc('hour', created_at)
+			ORDER BY hour DESC
+			LIMIT 24
+		""")
+		recent_activity = cursor.fetchall()
+		
+		# Calculate usage percentage (assuming 1GB limit for Railway free tier)
+		max_db_size = 1024 * 1024 * 1024  # 1GB in bytes
+		usage_percentage = (db_size_bytes / max_db_size) * 100 if db_size_bytes > 0 else 0
+		
+		# Determine status
+		if usage_percentage >= 90:
+			status = "CRITICAL"
+			status_color = "danger"
+		elif usage_percentage >= 75:
+			status = "WARNING"
+			status_color = "warning"
+		elif usage_percentage >= 50:
+			status = "MODERATE"
+			status_color = "info"
+		else:
+			status = "HEALTHY"
+			status_color = "success"
+		
+		cursor.close()
+		conn.close()
+		
+		return render_template("admin_database_monitor.html",
+			db_size=db_size_pretty,
+			db_size_bytes=db_size_bytes,
+			usage_percentage=usage_percentage,
+			status=status,
+			status_color=status_color,
+			table_sizes=table_sizes,
+			connection_info=connection_info,
+			user_count=user_count,
+			recent_activity=recent_activity
+		)
+		
+	except Exception as e:
+		flash(f"Database monitoring error: {str(e)}", "danger")
+		return redirect(url_for("main.dashboard"))
+
+
+@main_bp.get("/admin/database-monitor/api")
+@login_required
+def admin_database_monitor_api():
+	"""API endpoint for real-time database monitoring"""
+	if current_user.role != Role.ADMIN:
+		return jsonify({"error": "Unauthorized"}), 403
+	
+	try:
+		# Get database connection info
+		database_url = os.environ.get("DATABASE_URL")
+		if not database_url:
+			db_host = os.environ.get("DB_HOST", "localhost")
+			db_port = os.environ.get("DB_PORT", "5432")
+			db_name = os.environ.get("DB_NAME", "token_wallet")
+			db_user = os.environ.get("DB_USER", "wallet_user")
+			db_password = os.environ.get("DB_PASSWORD", "password")
+			database_url = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+		
+		conn = psycopg2.connect(database_url)
+		cursor = conn.cursor()
+		
+		# Get current database size
+		cursor.execute("SELECT pg_database_size(current_database())")
+		db_size_bytes = cursor.fetchone()[0]
+		
+		# Get connection count
+		cursor.execute("""
+			SELECT count(*) FROM pg_stat_activity 
+			WHERE datname = current_database()
+		""")
+		connection_count = cursor.fetchone()[0]
+		
+		# Get user count
+		user_count = User.query.count()
+		
+		# Calculate usage percentage
+		max_db_size = 1024 * 1024 * 1024  # 1GB
+		usage_percentage = (db_size_bytes / max_db_size) * 100
+		
+		cursor.close()
+		conn.close()
+		
+		return jsonify({
+			"db_size_bytes": db_size_bytes,
+			"db_size_pretty": f"{db_size_bytes / (1024*1024):.2f} MB",
+			"usage_percentage": round(usage_percentage, 2),
+			"connection_count": connection_count,
+			"user_count": user_count,
+			"status": "CRITICAL" if usage_percentage >= 90 else "WARNING" if usage_percentage >= 75 else "HEALTHY",
+			"timestamp": time.time()
+		})
+		
+	except Exception as e:
+		return jsonify({"error": str(e)}), 500
 
 

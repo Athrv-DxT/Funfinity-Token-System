@@ -1,0 +1,40 @@
+{
+  "test_summary": {
+    "total_users": 200,
+    "light_users": 60,
+    "active_users": 140,
+    "successful_users": 200,
+    "failed_users": 0,
+    "success_rate": 100.0,
+    "total_test_time": 13.626392364501953,
+    "total_requests": 680,
+    "requests_per_second": 49.9031571827819
+  },
+  "light_users": {
+    "count": 60,
+    "successful": 60,
+    "failed": 0,
+    "success_rate": 100.0,
+    "avg_response_time": 0.1,
+    "median_response_time": 0.1,
+    "p95_response_time": 0.1
+  },
+  "active_users": {
+    "count": 140,
+    "successful": 140,
+    "failed": 0,
+    "success_rate": 100.0,
+    "avg_response_time": 2.721408155986241,
+    "median_response_time": 1.2844066619873047,
+    "p95_response_time": 10.013162612915039
+  },
+  "overall_response_times": {
+    "min": 0.1,
+    "max": 12.513420820236206,
+    "average": 2.2588067166945516,
+    "median": 1.0173053741455078,
+    "p95": 9.55108904838562,
+    "p99": 11.86940598487854
+  },
+  "performance_rating": "GOOD - Great for production"
+}
