@@ -288,21 +288,29 @@ def admin_database_monitor():
 			db_password = os.environ.get("DB_PASSWORD", "password")
 			database_url = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
 		
+		# Limits and thresholds from env (defaults for Railway free)
+		max_db_size_mb = int(os.environ.get("DB_MAX_SIZE_MB", 1024))  # default 1GB
+		warn_threshold = float(os.environ.get("DB_WARN_THRESHOLD", 75))
+		critical_threshold = float(os.environ.get("DB_CRITICAL_THRESHOLD", 90))
+		
 		# Connect to database for monitoring
 		conn = psycopg2.connect(database_url)
 		cursor = conn.cursor()
 		
 		# Get database size
-		cursor.execute("""
+		cursor.execute(
+			"""
 			SELECT pg_size_pretty(pg_database_size(current_database())) as db_size,
-				   pg_database_size(current_database()) as db_size_bytes
-		""")
+			       pg_database_size(current_database()) as db_size_bytes
+			"""
+		)
 		db_size_result = cursor.fetchone()
 		db_size_pretty = db_size_result[0] if db_size_result else "Unknown"
 		db_size_bytes = db_size_result[1] if db_size_result else 0
 		
 		# Get table sizes
-		cursor.execute("""
+		cursor.execute(
+			"""
 			SELECT 
 				schemaname,
 				tablename,
@@ -313,25 +321,29 @@ def admin_database_monitor():
 			JOIN pg_class c ON c.relname = pt.tablename
 			WHERE schemaname = 'public'
 			ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC
-		""")
+			"""
+		)
 		table_sizes = cursor.fetchall()
 		
 		# Get connection info
-		cursor.execute("""
+		cursor.execute(
+			"""
 			SELECT 
 				count(*) as total_connections,
 				count(*) FILTER (WHERE state = 'active') as active_connections,
 				count(*) FILTER (WHERE state = 'idle') as idle_connections
 			FROM pg_stat_activity 
 			WHERE datname = current_database()
-		""")
+			"""
+		)
 		connection_info = cursor.fetchone()
 		
 		# Get user count
 		user_count = User.query.count()
 		
 		# Get recent activity (last 24 hours)
-		cursor.execute("""
+		cursor.execute(
+			"""
 			SELECT 
 				date_trunc('hour', created_at) as hour,
 				count(*) as transactions
@@ -340,18 +352,19 @@ def admin_database_monitor():
 			GROUP BY date_trunc('hour', created_at)
 			ORDER BY hour DESC
 			LIMIT 24
-		""")
+			"""
+		)
 		recent_activity = cursor.fetchall()
 		
-		# Calculate usage percentage (assuming 1GB limit for Railway free tier)
-		max_db_size = 1024 * 1024 * 1024  # 1GB in bytes
-		usage_percentage = (db_size_bytes / max_db_size) * 100 if db_size_bytes > 0 else 0
+		# Calculate usage percentage with env-based max size
+		max_db_size_bytes = max_db_size_mb * 1024 * 1024
+		usage_percentage = (db_size_bytes / max_db_size_bytes) * 100 if db_size_bytes > 0 else 0
 		
-		# Determine status
-		if usage_percentage >= 90:
+		# Determine status using env thresholds
+		if usage_percentage >= critical_threshold:
 			status = "CRITICAL"
 			status_color = "danger"
-		elif usage_percentage >= 75:
+		elif usage_percentage >= warn_threshold:
 			status = "WARNING"
 			status_color = "warning"
 		elif usage_percentage >= 50:
@@ -364,10 +377,12 @@ def admin_database_monitor():
 		cursor.close()
 		conn.close()
 		
-		return render_template("admin_database_monitor.html",
+		return render_template(
+			"admin_database_monitor.html",
 			db_size=db_size_pretty,
 			db_size_bytes=db_size_bytes,
 			usage_percentage=usage_percentage,
+			max_db_size_mb=max_db_size_mb,
 			status=status,
 			status_color=status_color,
 			table_sizes=table_sizes,
@@ -399,6 +414,11 @@ def admin_database_monitor_api():
 			db_password = os.environ.get("DB_PASSWORD", "password")
 			database_url = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
 		
+		# Limits and thresholds from env
+		max_db_size_mb = int(os.environ.get("DB_MAX_SIZE_MB", 1024))
+		warn_threshold = float(os.environ.get("DB_WARN_THRESHOLD", 75))
+		critical_threshold = float(os.environ.get("DB_CRITICAL_THRESHOLD", 90))
+		
 		conn = psycopg2.connect(database_url)
 		cursor = conn.cursor()
 		
@@ -407,18 +427,19 @@ def admin_database_monitor_api():
 		db_size_bytes = cursor.fetchone()[0]
 		
 		# Get connection count
-		cursor.execute("""
+		cursor.execute(
+			"""
 			SELECT count(*) FROM pg_stat_activity 
 			WHERE datname = current_database()
-		""")
+			"""
+		)
 		connection_count = cursor.fetchone()[0]
 		
 		# Get user count
 		user_count = User.query.count()
 		
 		# Calculate usage percentage
-		max_db_size = 1024 * 1024 * 1024  # 1GB
-		usage_percentage = (db_size_bytes / max_db_size) * 100
+		usage_percentage = (db_size_bytes / (max_db_size_mb * 1024 * 1024)) * 100
 		
 		cursor.close()
 		conn.close()
@@ -429,7 +450,7 @@ def admin_database_monitor_api():
 			"usage_percentage": round(usage_percentage, 2),
 			"connection_count": connection_count,
 			"user_count": user_count,
-			"status": "CRITICAL" if usage_percentage >= 90 else "WARNING" if usage_percentage >= 75 else "HEALTHY",
+			"status": "CRITICAL" if usage_percentage >= critical_threshold else "WARNING" if usage_percentage >= warn_threshold else "HEALTHY",
 			"timestamp": time.time()
 		})
 		

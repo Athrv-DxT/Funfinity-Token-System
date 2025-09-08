@@ -122,9 +122,9 @@
                         </div>
                     </div>
                     <small class="text-muted">
-                        Railway Free Tier Limit: 1GB | 
+                        Max Size: {{ max_db_size_mb }} MB | 
                         Used: {{ db_size }} | 
-                        Free: {{ "%.2f"|format((1024 - (db_size_bytes / (1024*1024)))) }} MB
+                        Free: {{ "%.2f"|format((max_db_size_mb - (db_size_bytes / (1024*1024)))) }} MB
                     </small>
                 </div>
             </div>

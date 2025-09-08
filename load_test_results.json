@@ -1,26 +1,24 @@
 {
   "test_summary": {
-    "total_users": 200,
-    "successful_users": 198,
-    "failed_users": 2,
-    "success_rate": 99.0,
-    "total_test_time": 16.685585498809814,
-    "total_requests": 800,
-    "requests_per_second": 47.94557554225857
+    "total_users": 150,
+    "successful_users": 150,
+    "failed_users": 0,
+    "success_rate": 100.0,
+    "total_test_time": 17.70342707633972,
+    "total_requests": 600,
+    "requests_per_second": 33.89174296099358
   },
   "response_times": {
-    "min": 0.2794504165649414,
-    "max": 15.50773549079895,
-    "average": 2.9761993619799614,
-    "median": 1.0011849403381348,
-    "p95": 12.863853693008423,
-    "p99": 15.034262657165527
+    "min": 0.26668667793273926,
+    "max": 13.54863452911377,
+    "average": 2.6331600252787273,
+    "median": 1.0383033752441406,
+    "p95": 10.098183870315552,
+    "p99": 12.276218891143799
   },
   "status_codes": {
-    "302": 198,
-    "200": 600,
-    "500": 1,
-    "502": 1
+    "302": 150,
+    "200": 450
   },
   "performance_rating": "FAIR - Optimizations recommended"
 }

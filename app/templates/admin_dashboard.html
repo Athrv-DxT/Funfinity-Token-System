@@ -176,9 +176,14 @@
                 <h1>🔧 Admin Dashboard</h1>
                 <p>Manage users, roles, and system settings</p>
             </div>
-            <form method="post" action="/auth/logout" style="margin: 0;">
-                <button type="submit" class="btn btn-secondary">Logout</button>
-            </form>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <a href="/admin/database-monitor" class="btn btn-warning" id="db-status-badge" title="Database Monitor">
+                    DB: Checking...
+                </a>
+                <form method="post" action="/auth/logout" style="margin: 0;">
+                    <button type="submit" class="btn btn-secondary">Logout</button>
+                </form>
+            </div>
         </div>
 
         <!-- Flash Messages -->
@@ -312,6 +317,25 @@
     </div>
 
     <script>
+        // Live DB status badge
+        function refreshDbBadge() {
+            fetch('/admin/database-monitor/api')
+                .then(r => r.json())
+                .then(data => {
+                    const badge = document.getElementById('db-status-badge');
+                    if (!badge || data.error) return;
+                    badge.textContent = `DB: ${data.usage_percentage}%`;
+                    badge.className = 'btn ' + (
+                        data.status === 'CRITICAL' ? 'btn-danger' :
+                        data.status === 'WARNING' ? 'btn-warning' :
+                        'btn-success'
+                    );
+                })
+                .catch(() => {});
+        }
+
+        setInterval(refreshDbBadge, 30000);
+        document.addEventListener('DOMContentLoaded', refreshDbBadge);
         function showSection(sectionName, clickedElement = null) {
             // Hide all sections
             document.querySelectorAll('.content-section').forEach(section => {
