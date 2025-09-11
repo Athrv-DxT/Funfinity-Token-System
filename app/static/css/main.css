@@ -18,6 +18,7 @@ a.btn.secondary { background:#fde047; }
 /* Enhanced landing hero + glassmorphism auth */
 .enhanced-landing { position: relative; overflow: hidden; min-height: 100vh; background: radial-gradient(1200px 600px at -10% -10%, rgba(14,165,233,0.2), transparent 60%), radial-gradient(900px 500px at 110% 10%, rgba(99,102,241,0.18), transparent 60%), radial-gradient(800px 600px at 50% 120%, rgba(16,185,129,0.18), transparent 60%), linear-gradient(135deg, #0f172a, #111827 40%, #0b1020 100%); }
 .bg-decor .orb { position: absolute; filter: blur(60px); opacity: 0.6; border-radius: 50%; }
+.bg-decor { pointer-events: none; }
 .bg-decor .o1 { width: 300px; height: 300px; background: #0ea5e9; top: -60px; left: -40px; }
 .bg-decor .o2 { width: 280px; height: 280px; background: #8b5cf6; right: -60px; top: 40px; }
 .bg-decor .o3 { width: 360px; height: 360px; background: #10b981; bottom: -80px; left: 40%; }
@@ -97,6 +98,7 @@ a.btn.secondary { background:#fde047; }
 
 /* Manager mobile layout tweaks */
 .manager-page { color: #e5e7eb; }
+.manager-wrap { max-width: 840px; margin: 0 auto; padding: 12px 16px; position: relative; z-index: 1; }
 .manager-page h2 { text-align: center; }
 .manager-page .card.glass h3 { color: #e5e7eb; }
 .manager-page .form-group label { color: #cbd5e1; }
@@ -105,7 +107,7 @@ a.btn.secondary { background:#fde047; }
 .manager-page small { color: #cbd5e1; }
 
 @media (max-width: 640px) {
-  .manager-page { padding: 0 12px !important; }
+  .manager-wrap { padding: 12px; }
   #qr-reader { max-width: 100% !important; min-height: 220px !important; }
   .row { flex-direction: column; }
 }
