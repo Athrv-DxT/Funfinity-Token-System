@@ -225,14 +225,55 @@ def admin_bulk_import():
 	wb = load_workbook(upload)
 	ws = wb.active
 	participants = []
-	
-	for row in ws.iter_rows(min_row=2, values_only=True):
-		name, email = row[0], row[1]
-		if not name:
+
+	# Map headers (case-insensitive) so we can find the 'email' column safely
+	header_row = next(ws.iter_rows(min_row=1, max_row=1, values_only=True))
+	# Build a lookup like {'email': idx, 'name': idx}
+	header_to_index = {}
+	for idx, header_value in enumerate(header_row):
+		if header_value is None:
 			continue
-		username = str(name).strip().replace(" ", "").lower()
+		normalized = str(header_value).strip().lower()
+		header_to_index[normalized] = idx
+
+	# Accept common variants
+	email_header_candidates = [
+		"email",
+		"e-mail",
+		"mail",
+	]
+	name_header_candidates = [
+		"name",
+		"full name",
+		"fullname",
+		"participant name",
+	]
+
+	# Resolve indices
+	email_idx = next((header_to_index[h] for h in email_header_candidates if h in header_to_index), None)
+	name_idx = next((header_to_index[h] for h in name_header_candidates if h in header_to_index), None)
+
+	if email_idx is None:
+		flash("Could not find 'email' column in the uploaded file.", "danger")
+		return redirect(url_for("main.dashboard"))
+
+	for row in ws.iter_rows(min_row=2, values_only=True):
+		row_values = list(row)
+		email = row_values[email_idx] if email_idx < len(row_values) else None
+		name = row_values[name_idx] if (name_idx is not None and name_idx < len(row_values)) else None
+
+		# Skip rows without email
+		if not email:
+			continue
+
+		# Derive username: prefer cleaned name; fallback to email local-part
+		if name:
+			username = str(name).strip().replace(" ", "").lower()
+		else:
+			username = str(email).split("@")[0].strip().replace(" ", "").lower()
+
 		password_plain = generate_password_from_name(username)
-		
+
 		participants.append({
 			'name': name,
 			'email': email,
