@@ -176,8 +176,12 @@ function startHtml5QrcodeScanner() {
     scannerContainer.innerHTML = ''; // Clear existing content
     scannerContainer.appendChild(scannerElement);
     
-    // Add loading message
-    scannerElement.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #fff; background: #000;">Loading camera...</div>';
+    // Add loading overlay
+    const loadingOverlay = document.createElement('div');
+    loadingOverlay.id = 'qr-loading-overlay';
+    loadingOverlay.style.cssText = 'display:flex;align-items:center;justify-content:center;height:100%;color:#fff;background:#000;position:absolute;inset:0;z-index:2;';
+    loadingOverlay.textContent = 'Loading camera...';
+    scannerElement.appendChild(loadingOverlay);
     
     try {
         // Initialize scanner
@@ -250,6 +254,15 @@ function startHtml5QrcodeScanner() {
     };
     
     tryNextCamera();
+    
+    // Once started, remove loading overlay when video becomes available
+    const removeOverlayWhenReady = setInterval(() => {
+        const video = scannerElement.querySelector('video');
+        if (video && video.readyState >= 2) {
+            if (loadingOverlay && loadingOverlay.parentNode) loadingOverlay.parentNode.removeChild(loadingOverlay);
+            clearInterval(removeOverlayWhenReady);
+        }
+    }, 150);
 }
 
 // Show camera not supported message
