@@ -84,15 +84,19 @@ def admin_delete_user():
 			except OSError:
 				pass  # Continue even if file deletion fails
 	
+	# Store user info before deletion for logging and cache invalidation
+	user_id = target.id
+	user_username = target.username
+	
 	# Delete the user
 	db.session.delete(target)
 	db.session.commit()
 	
 	# Invalidate any cached data for this user
-	cache.delete(f"user_data_{target.id}")
+	cache.delete(f"user_data_{user_id}")
 	
-	flash(f"User {username} has been deleted successfully", "success")
-	log_event("admin_user_deleted", resource=username)
+	flash(f"User {user_username} has been deleted successfully", "success")
+	log_event("admin_user_deleted", resource=user_username)
 	return redirect(url_for("main.dashboard"))
 
 
