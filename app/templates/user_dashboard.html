@@ -5,12 +5,7 @@
     <title>User Dashboard</title>
     <link rel="stylesheet" href="/static/css/main.css">
 </head>
-<body class="page-user enhanced-landing">
-    <div class="bg-decor">
-        <span class="orb o1"></span>
-        <span class="orb o2"></span>
-        <span class="orb o3"></span>
-    </div>
+<body class="page-user">
     <div class="user-wrap">
         <h2 style="margin-top:8px;">Your Wallet</h2>
         
@@ -49,13 +44,15 @@
         
         <p>Balance: <strong>{{ balance }}</strong></p>
         {% if qr_data_uri %}
-        <div class="qr-card" style="margin-bottom:20px;">
-            <img src="{{ qr_data_uri }}" alt="Your QR" style="max-width:280px;">
+        <div class="qr-card" style="margin-bottom:12px;">
+            <img src="{{ qr_data_uri }}" alt="Your QR" style="max-width:280px;" loading="lazy">
         </div>
+        <div class="qr-caption">@{{ current_user.username }}</div>
         {% elif qr_filename %}
-        <div class="qr-card" style="margin-bottom:20px;">
-            <img src="/static/qr_codes/{{ qr_filename }}" alt="Your QR" style="max-width:280px;">
+        <div class="qr-card" style="margin-bottom:12px;">
+            <img src="/static/qr_codes/{{ qr_filename }}" alt="Your QR" style="max-width:280px;" loading="lazy">
         </div>
+        <div class="qr-caption">@{{ current_user.username }}</div>
         {% endif %}
 
         <div class="agenda-card">

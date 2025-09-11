@@ -62,7 +62,7 @@ a.btn.secondary { background:#fde047; }
 
 /* User Dashboard */
 .page-user { color:#fff; min-height:100vh; }
-.user-wrap { max-width:760px; margin:20px auto; padding:16px; text-align:center; }
+.user-wrap { max-width:620px; margin:20px auto; padding:16px; text-align:center; }
 .qr-card { background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.18); border-radius:12px; padding:16px; display:inline-block; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
 .logout-btn { padding:10px 14px; border-radius:10px; border:none; font-weight:bold; }
 
@@ -74,6 +74,10 @@ a.btn.secondary { background:#fde047; }
 .games-grid { list-style: none; padding: 0; margin: 12px 0 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
 .games-grid li { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); border-radius: 12px; padding: 12px; text-align: center; color: #e5e7eb; font-weight: 700; letter-spacing: .3px; }
 .games-grid li:hover { background: rgba(167,139,250,0.25); border-color: rgba(167,139,250,0.45); }
+
+/* Light-weight background for user page (no heavy orbs) */
+.page-user { background: linear-gradient(135deg, #0f172a, #111827 40%, #0b1020 100%); }
+.qr-caption { color: #cbd5e1; font-weight: 700; letter-spacing: .3px; margin-bottom: 10px; }
 
 /* Manager */
 #reader { width: 100%; max-width: 480px; margin: 12px auto; }
