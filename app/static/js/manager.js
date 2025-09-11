@@ -100,46 +100,10 @@ function initQRScanner() {
 
 // Show camera start button for mobile compatibility
 function showCameraStartButton() {
+    // We no longer show a start button in the preview; controls are below
     const scannerContainer = document.getElementById('qr-reader');
     if (!scannerContainer) return;
-    
-    // Clear any existing content
-    scannerContainer.innerHTML = '';
-    
-    // Test camera support first
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        showCameraNotSupported(scannerContainer);
-        return;
-    }
-    
-    const startButton = document.createElement('button');
-    startButton.className = 'btn btn-primary';
-    startButton.style.cssText = 'padding: 15px 30px; font-size: 16px; margin: 20px auto; display: block;';
-    startButton.innerHTML = '📷 Start Camera Scanner';
-    startButton.onclick = () => {
-        console.log('Start button clicked');
-        startHtml5QrcodeScanner();
-    };
-    
-    scannerContainer.appendChild(startButton);
-    
-    // Add instructions based on device type
-    const instructions = document.createElement('p');
-    instructions.style.cssText = 'text-align: center; color: #666; margin-top: 10px; font-size: 14px;';
-    
-    if (isMobileDevice()) {
-        instructions.innerHTML = 'Click the button above to start the camera.';
-    } else {
-        instructions.textContent = 'Click the button above to start the camera and scan QR codes';
-    }
-    
-    scannerContainer.appendChild(instructions);
-    
-    // Add debug info
-    const debugInfo = document.createElement('div');
-    debugInfo.style.cssText = 'text-align: center; color: #999; font-size: 12px; margin-top: 10px;';
-    debugInfo.innerHTML = `Debug: ${location.hostname} | ${location.protocol} | Secure: ${window.isSecureContext}`;
-    scannerContainer.appendChild(debugInfo);
+    scannerContainer.innerHTML = '<p style="color:#cbd5e1; text-align:center;">Scanner idle</p>';
 }
 
 // Load Html5Qrcode library
@@ -361,10 +325,10 @@ function handleQRScan(qrData) {
         }
     }
     
-    // Resume scanning after 2 seconds
-    setTimeout(() => {
-        restartCamera();
-    }, 2000);
+    // Do not auto-stop; keep scanning until Stop pressed
+    if (scanner && !isScanning) {
+        startHtml5QrcodeScanner();
+    }
 }
 
 // Manual QR input for testing
@@ -399,8 +363,8 @@ function debugScanner() {
 function restartCamera() {
     stopCamera();
     setTimeout(() => {
-        showCameraStartButton();
-    }, 500);
+        startHtml5QrcodeScanner();
+    }, 300);
 }
 
 // Stop camera
@@ -413,6 +377,14 @@ function stopCamera() {
             console.error('Error stopping scanner:', err);
         });
     }
+}
+
+// Explicit controls used by UI buttons
+function startScanner(){
+    startHtml5QrcodeScanner();
+}
+function stopScanner(){
+    stopCamera();
 }
 
 // Show message
