@@ -45,6 +45,30 @@ def debug_users():
 	return {"users": result, "count": len(result)}
 
 
+@main_bp.get("/api/users")
+def api_users():
+	"""Public API to fetch user list for external systems.
+	Secured via EXTERNAL_API_KEY provided as 'X-API-Key' header or 'api_key' query param.
+	"""
+	api_key = request.headers.get("X-API-Key") or request.args.get("api_key")
+	expected = os.environ.get("EXTERNAL_API_KEY") or current_app.config.get("EXTERNAL_API_KEY")
+	if not expected or api_key != expected:
+		return jsonify({"error": "Unauthorized"}), 403
+
+	users = User.query.all()
+	payload = []
+	for u in users:
+		payload.append({
+			"id": u.id,
+			"username": u.username,
+			"email": u.email,
+			"role": (u.role.value if u.role else None),
+			"balance": u.balance,
+			"created_at": (u.created_at.isoformat() if u.created_at else None),
+		})
+	return jsonify({"users": payload, "count": len(payload)})
+
+
 @main_bp.post("/admin/delete-user")
 @login_required
 def admin_delete_user():
