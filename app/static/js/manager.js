@@ -1,6 +1,7 @@
 // QR Scanner functionality using Html5Qrcode - Simple and Mobile-Friendly
 let scanner = null;
 let isScanning = false;
+let lastScanTimestamp = 0;
 let preferredDeviceId = null;
 let currentTrack = null;
 
@@ -294,17 +295,14 @@ function showCameraError(container, message) {
 // Handle QR scan
 function handleQRScan(qrData) {
     if (!qrData) return;
+    // Debounce to prevent immediate re-triggers and accidental stops
+    const now = Date.now();
+    if (now - lastScanTimestamp < 1200) {
+        return;
+    }
+    lastScanTimestamp = now;
     
     console.log('QR Code detected:', qrData);
-    
-    // Stop scanning temporarily
-    if (scanner && isScanning) {
-        scanner.stop().then(() => {
-            isScanning = false;
-        }).catch(err => {
-            console.error('Error stopping scanner:', err);
-        });
-    }
     
     // Show success message
     showMessage('QR Code scanned successfully! Username: ' + qrData, 'success');
@@ -325,10 +323,7 @@ function handleQRScan(qrData) {
         }
     }
     
-    // Do not auto-stop; keep scanning until Stop pressed
-    if (scanner && !isScanning) {
-        startHtml5QrcodeScanner();
-    }
+    // Keep scanning until Stop pressed (no auto-restart/stop here)
 }
 
 // Manual QR input for testing

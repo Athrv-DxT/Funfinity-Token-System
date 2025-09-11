@@ -95,6 +95,21 @@ a.btn.secondary { background:#fde047; }
 
 .card.glass { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.18); color: #e5e7eb; box-shadow: 0 20px 40px rgba(0,0,0,0.35); }
 
+/* Manager mobile layout tweaks */
+.manager-page { color: #e5e7eb; }
+.manager-page h2 { text-align: center; }
+.manager-page .card.glass h3 { color: #e5e7eb; }
+.manager-page .form-group label { color: #cbd5e1; }
+.manager-page input, .manager-page select { background: rgba(255,255,255,0.12); color: #e5e7eb; border: 1px solid rgba(255,255,255,0.24); }
+.manager-page input::placeholder { color: #cbd5e1; }
+.manager-page small { color: #cbd5e1; }
+
+@media (max-width: 640px) {
+  .manager-page { padding: 0 12px !important; }
+  #qr-reader { max-width: 100% !important; min-height: 220px !important; }
+  .row { flex-direction: column; }
+}
+
 .card h3 {
     margin-top: 0;
     color: #1f2937;
