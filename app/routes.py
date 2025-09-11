@@ -7,7 +7,7 @@ import os
 import time
 
 from .models import User, Role, WalletTransaction
-from .wallet import ensure_qr_for_user, change_balance
+from .wallet import ensure_qr_for_user, change_balance, generate_qr_data_uri
 from . import db, cache
 from .audit import log_event
 from .email_utils import send_credentials_email
@@ -132,8 +132,8 @@ def dashboard():
 	if current_user.role == Role.MANAGER:
 		return render_template("manager_dashboard.html")
 	# USER
-	qr = ensure_qr_for_user(current_user)
-	return render_template("user_dashboard.html", qr_filename=qr, balance=current_user.balance)
+	qr_data_uri = generate_qr_data_uri(current_user)
+	return render_template("user_dashboard.html", qr_filename=None, qr_data_uri=qr_data_uri, balance=current_user.balance)
 
 
 @main_bp.post("/admin/update-balance")

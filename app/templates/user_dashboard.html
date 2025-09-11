@@ -48,7 +48,11 @@
         {% endwith %}
         
         <p>Balance: <strong>{{ balance }}</strong></p>
-        {% if qr_filename %}
+        {% if qr_data_uri %}
+        <div class="qr-card" style="margin-bottom:20px;">
+            <img src="{{ qr_data_uri }}" alt="Your QR" style="max-width:280px;">
+        </div>
+        {% elif qr_filename %}
         <div class="qr-card" style="margin-bottom:20px;">
             <img src="/static/qr_codes/{{ qr_filename }}" alt="Your QR" style="max-width:280px;">
         </div>

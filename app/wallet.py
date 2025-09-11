@@ -27,6 +27,24 @@ def ensure_qr_for_user(user: User) -> str:
 	return filename
 
 
+def generate_qr_data_uri(user: User) -> str:
+	"""Generate a QR code PNG as a data URI for the given user.
+	This avoids relying on ephemeral filesystem storage on platforms like Railway.
+	"""
+	buf = io.BytesIO()
+	img = qrcode.make(str(user.username))
+	img.save(buf, format="PNG")
+	data = buf.getvalue()
+	try:
+		import base64
+		b64 = base64.b64encode(data).decode("ascii")
+		return f"data:image/png;base64,{b64}"
+	except Exception:
+		# Fallback: create file-based QR as last resort
+		filename = ensure_qr_for_user(user)
+		return f"/static/qr_codes/{filename}"
+
+
 def change_balance(target_user: User, delta: int, reason: str | None = None) -> tuple[WalletTransaction | None, bool, str]:
 	"""
 	Change user balance with validation.
