@@ -67,6 +67,6 @@ def register_submit():
 def logout_submit():
 	log_event("auth_logout", resource=current_user.username)
 	logout_user()
-	return redirect(url_for("auth.login_page"))
+	return redirect(url_for("main.index"))
 
 
