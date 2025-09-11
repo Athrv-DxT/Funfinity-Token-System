@@ -72,7 +72,15 @@ def admin_delete_user():
 		return redirect(url_for("main.dashboard"))
 	
 	# Delete associated transactions first (due to foreign key constraints)
-	WalletTransaction.query.filter_by(user_id=target.id).delete()
+	# Delete transactions where user is the target OR the performer
+	WalletTransaction.query.filter(
+		(WalletTransaction.user_id == target.id) | 
+		(WalletTransaction.performed_by_id == target.id)
+	).delete()
+	
+	# Delete audit logs where user is the actor
+	from .models import AuditLog
+	AuditLog.query.filter_by(actor_id=target.id).delete()
 	
 	# Delete user's QR code file if it exists
 	if target.qr_filename:
