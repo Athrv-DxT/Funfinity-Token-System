@@ -412,6 +412,52 @@ def admin_bulk_import_confirm():
 	return redirect(url_for("main.dashboard"))
 
 
+@main_bp.post("/admin/bulk-import-download")
+@login_required
+def admin_bulk_import_download():
+	"""Download the preview participants list as CSV before sending emails"""
+	if current_user.role != Role.ADMIN:
+		return jsonify({"error": "Unauthorized"}), 403
+
+	# Get participants data from form (same as confirm)
+	participants_list = request.form.getlist("participants")
+	if not participants_list:
+		flash("No participants data found for download", "danger")
+		return redirect(url_for("main.dashboard"))
+
+	import csv
+	import io
+	import json
+
+	participants = []
+	for participant_data in participants_list:
+		try:
+			clean_data = participant_data.strip()
+			if clean_data:
+				participant = json.loads(clean_data)
+				participants.append(participant)
+		except json.JSONDecodeError:
+			continue
+
+	# Prepare CSV
+	output = io.StringIO()
+	writer = csv.writer(output)
+	writer.writerow(["Name", "Email", "Username", "Password", "Status"]) 
+	for p in participants:
+		status = "Already Exists" if p.get("exists") else "Ready"
+		writer.writerow([
+			p.get("name", ""),
+			p.get("email", ""),
+			p.get("username", ""),
+			p.get("password", ""),
+			status,
+		])
+
+	response = make_response(output.getvalue())
+	response.headers["Content-Type"] = "text/csv"
+	response.headers["Content-Disposition"] = "attachment; filename=bulk_import_preview.csv"
+	return response
+
 @main_bp.get("/admin/database-monitor")
 @login_required
 def admin_database_monitor():

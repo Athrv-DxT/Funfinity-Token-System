@@ -67,6 +67,15 @@
                 </button>
             </form>
             
+            <form method="post" action="/admin/bulk-import-download" style="margin: 0;">
+                {% for participant in participants %}
+                <input type="hidden" name="participants" value='{{ participant|tojson }}'>
+                {% endfor %}
+                <button type="submit" class="btn btn-primary">
+                    📥 Download Preview CSV
+                </button>
+            </form>
+
             <a href="/admin/download-credentials" class="btn btn-primary">
                 📥 Download All User Credentials (CSV)
             </a>
