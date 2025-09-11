@@ -54,17 +54,23 @@
     </div>
 
     <div class="card">
-        <h3>📧 Send Emails</h3>
-        <p>Click the button below to create accounts and send credentials via email:</p>
+        <h3>📧 Send Emails & Download</h3>
+        <p>Choose an option below:</p>
         
-        <form method="post" action="/admin/bulk-import-confirm" id="confirmForm">
-            {% for participant in participants %}
-            <input type="hidden" name="participants" value='{{ participant|tojson }}'>
-            {% endfor %}
-            <button type="submit" class="btn btn-success" onclick="return confirm('Are you sure you want to create accounts and send emails? This action cannot be undone.')">
-                📧 Send Emails & Create Accounts
-            </button>
-        </form>
+        <div style="display: flex; gap: 15px; margin: 20px 0; flex-wrap: wrap;">
+            <form method="post" action="/admin/bulk-import-confirm" id="confirmForm" style="margin: 0;">
+                {% for participant in participants %}
+                <input type="hidden" name="participants" value='{{ participant|tojson }}'>
+                {% endfor %}
+                <button type="submit" class="btn btn-success" onclick="return confirm('Are you sure you want to create accounts and send emails? This action cannot be undone.')">
+                    📧 Send Emails & Create Accounts
+                </button>
+            </form>
+            
+            <a href="/admin/download-credentials" class="btn btn-primary">
+                📥 Download All User Credentials (CSV)
+            </a>
+        </div>
         
         <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-radius: 5px; font-size: 14px; color: #856404;">
             <strong>⚠️ Important:</strong><br>

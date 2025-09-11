@@ -132,6 +132,13 @@
         .btn-secondary:hover {
             background: #5a6268;
         }
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #c82333;
+        }
         .users-table {
             width: 100%;
             border-collapse: collapse;
@@ -238,7 +245,17 @@
             <div class="nav-card" onclick="showSection('users', this)">
                 <div class="nav-icon">👥</div>
                 <div class="nav-title">Current Users</div>
-                <div class="nav-desc">View all system users</div>
+                <div class="nav-desc">View and manage all users</div>
+            </div>
+            <div class="nav-card" onclick="showSection('delete', this)">
+                <div class="nav-icon">🗑️</div>
+                <div class="nav-title">Delete User</div>
+                <div class="nav-desc">Remove users from system</div>
+            </div>
+            <div class="nav-card" onclick="window.location.href='/admin/download-credentials'">
+                <div class="nav-icon">📥</div>
+                <div class="nav-title">Download Credentials</div>
+                <div class="nav-desc">Export all user data as CSV</div>
             </div>
             <div class="nav-card" onclick="window.location.href='/admin/database-monitor'">
                 <div class="nav-icon">🗄️</div>
@@ -312,6 +329,33 @@
             <p>View and manage all users in the system.</p>
             <div id="users-table-container">
                 <p>Loading users...</p>
+            </div>
+        </div>
+
+
+        <!-- Delete User Section -->
+        <div id="delete-section" class="content-section">
+            <h3>🗑️ Delete User</h3>
+            <p style="color: #dc3545; font-weight: bold;">⚠️ WARNING: This action cannot be undone!</p>
+            <p>This will permanently delete the user and all their data including transactions and QR codes.</p>
+            <form method="post" action="/admin/delete-user" id="delete-user-form">
+                <div class="form-group">
+                    <label for="delete-username">Username to Delete:</label>
+                    <input id="delete-username" type="text" name="username" placeholder="Enter username" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirm-username">Confirm Username:</label>
+                    <input id="confirm-username" type="text" name="confirm_username" placeholder="Type username again to confirm" required>
+                </div>
+                <button type="submit" class="btn btn-danger">Delete User Permanently</button>
+            </form>
+            <div style="margin-top: 20px; padding: 15px; background: #f8d7da; border-radius: 5px; border: 1px solid #f5c6cb;">
+                <strong>🚨 DANGER ZONE:</strong><br>
+                • This will delete the user account permanently<br>
+                • All wallet transactions will be removed<br>
+                • QR code files will be deleted<br>
+                • You cannot delete your own account<br>
+                • This action is logged for audit purposes
             </div>
         </div>
     </div>

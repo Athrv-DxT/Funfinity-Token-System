@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
+from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, current_app, make_response
 from flask_login import login_required, current_user
 from werkzeug.security import check_password_hash
 import psycopg2
@@ -6,7 +6,7 @@ from sqlalchemy import text
 import os
 import time
 
-from .models import User, Role
+from .models import User, Role, WalletTransaction
 from .wallet import ensure_qr_for_user, change_balance
 from . import db, cache
 from .audit import log_event
@@ -43,6 +43,57 @@ def debug_users():
 			"balance": user.balance
 		})
 	return {"users": result, "count": len(result)}
+
+
+@main_bp.post("/admin/delete-user")
+@login_required
+def admin_delete_user():
+	"""Delete a user from the system"""
+	if current_user.role != Role.ADMIN:
+		flash("Unauthorized", "danger")
+		return redirect(url_for("main.dashboard"))
+	
+	username = request.form.get("username", "").strip()
+	confirm_username = request.form.get("confirm_username", "").strip()
+	
+	# Double confirmation for safety
+	if username != confirm_username:
+		flash("Username confirmation does not match. User not deleted.", "danger")
+		return redirect(url_for("main.dashboard"))
+	
+	target = User.query.filter_by(username=username).first()
+	if not target:
+		flash("User not found", "danger")
+		return redirect(url_for("main.dashboard"))
+	
+	# Prevent admin from deleting themselves
+	if target.id == current_user.id:
+		flash("Cannot delete your own account", "danger")
+		return redirect(url_for("main.dashboard"))
+	
+	# Delete associated transactions first (due to foreign key constraints)
+	WalletTransaction.query.filter_by(user_id=target.id).delete()
+	
+	# Delete user's QR code file if it exists
+	if target.qr_filename:
+		import os
+		qr_path = os.path.join(current_app.root_path, "static", "qr_codes", target.qr_filename)
+		if os.path.exists(qr_path):
+			try:
+				os.remove(qr_path)
+			except OSError:
+				pass  # Continue even if file deletion fails
+	
+	# Delete the user
+	db.session.delete(target)
+	db.session.commit()
+	
+	# Invalidate any cached data for this user
+	cache.delete(f"user_data_{target.id}")
+	
+	flash(f"User {username} has been deleted successfully", "success")
+	log_event("admin_user_deleted", resource=username)
+	return redirect(url_for("main.dashboard"))
 
 
 @main_bp.get("/dashboard")
@@ -179,6 +230,46 @@ def admin_bulk_import():
 		})
 
 	return render_template("bulk_import_preview.html", participants=participants)
+
+
+@main_bp.get("/admin/download-credentials")
+@login_required
+def admin_download_credentials():
+	"""Download user credentials as CSV file"""
+	if current_user.role != Role.ADMIN:
+		flash("Unauthorized", "danger")
+		return redirect(url_for("main.dashboard"))
+	
+	import csv
+	import io
+	from datetime import datetime
+	
+	# Get all users
+	users = User.query.all()
+	
+	# Create CSV content
+	output = io.StringIO()
+	writer = csv.writer(output)
+	
+	# Write header
+	writer.writerow(['Username', 'Email', 'Role', 'Balance', 'Created At'])
+	
+	# Write user data
+	for user in users:
+		writer.writerow([
+			user.username,
+			user.email or '',
+			user.role.value if user.role else '',
+			user.balance,
+			user.created_at.strftime('%Y-%m-%d %H:%M:%S') if user.created_at else ''
+		])
+	
+	# Create response
+	response = make_response(output.getvalue())
+	response.headers['Content-Type'] = 'text/csv'
+	response.headers['Content-Disposition'] = f'attachment; filename=user_credentials_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
+	
+	return response
 
 
 @main_bp.post("/admin/bulk-import-confirm")
