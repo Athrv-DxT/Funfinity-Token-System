@@ -5,9 +5,14 @@
     <title>User Dashboard</title>
     <link rel="stylesheet" href="/static/css/main.css">
 </head>
-<body class="page-user">
+<body class="page-user enhanced-landing">
+    <div class="bg-decor">
+        <span class="orb o1"></span>
+        <span class="orb o2"></span>
+        <span class="orb o3"></span>
+    </div>
     <div class="user-wrap">
-        <h2>Your Wallet</h2>
+        <h2 style="margin-top:8px;">Your Wallet</h2>
         
         <!-- Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -44,10 +49,32 @@
         
         <p>Balance: <strong>{{ balance }}</strong></p>
         {% if qr_filename %}
-        <div class="qr-card">
+        <div class="qr-card" style="margin-bottom:20px;">
             <img src="/static/qr_codes/{{ qr_filename }}" alt="Your QR" style="max-width:280px;">
         </div>
         {% endif %}
+
+        <div class="agenda-card">
+            <div class="agenda-title">Your Agenda: <span>Funfinity</span></div>
+            <div class="menu-title">Our Menu</div>
+            <ul class="games-grid">
+                <li>Wire Loop</li>
+                <li>A.I game</li>
+                <li>Sling Puck</li>
+                <li>Dart Game</li>
+                <li>Coin Tower</li>
+                <li>Ring Toss</li>
+                <li>Jenga</li>
+                <li>connect 4</li>
+                <li>Beyblade Battle</li>
+                <li>Mini Soccer</li>
+                <li>ping pong ball game</li>
+                <li>Pick up the stick</li>
+                <li>Blindfold Drawing</li>
+                <li>Guess the Song</li>
+                <li>Know Your Partner</li>
+            </ul>
+        </div>
         <form method="post" action="/auth/logout" style="margin-top:16px;">
             <button class="logout-btn">Logout</button>
         </form>
