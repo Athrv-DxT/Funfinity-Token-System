@@ -177,6 +177,11 @@ def admin_update_balance():
 	if success:
 		# Invalidate cache for the user whose balance was updated
 		cache.delete(f"user_data_{target.id}")
+		# Send real-time update to user (optional feature)
+		try:
+			send_balance_update(target.id, target.balance, delta, "admin_update")
+		except:
+			pass  # Silently fail to not disrupt existing functionality
 		flash(message, "success")
 	else:
 		flash(message, "warning")
@@ -202,6 +207,11 @@ def manager_update_balance():
 	if success:
 		# Invalidate cache for the user whose balance was updated
 		cache.delete(f"user_data_{target.id}")
+		# Send real-time update to user (optional feature)
+		try:
+			send_balance_update(target.id, target.balance, delta, f"manager_{action}")
+		except:
+			pass  # Silently fail to not disrupt existing functionality
 		flash(message, "success")
 	else:
 		flash(message, "warning")
@@ -670,5 +680,80 @@ def admin_database_monitor_api():
 		
 	except Exception as e:
 		return jsonify({"error": str(e)}), 500
+
+
+# ===========================================
+# REAL-TIME UPDATE SYSTEM (Optional Feature)
+# ===========================================
+# This is a non-disruptive addition for real-time balance updates
+# If it causes any issues, it can be easily disabled
+
+import json
+import threading
+import queue
+from flask import Response
+
+# Real-time update system using Server-Sent Events
+user_queues = {}  # Store queues for each user
+queue_lock = threading.Lock()
+
+def get_user_queue(user_id):
+	"""Get or create a queue for a specific user"""
+	with queue_lock:
+		if user_id not in user_queues:
+			user_queues[user_id] = queue.Queue()
+		return user_queues[user_id]
+
+def send_balance_update(user_id, new_balance, change_amount, reason):
+	"""Send balance update to a specific user (safe to call even if feature disabled)"""
+	try:
+		user_queue = get_user_queue(user_id)
+		update_data = {
+			'type': 'balance_update',
+			'new_balance': new_balance,
+			'change_amount': change_amount,
+			'reason': reason,
+			'timestamp': time.time()
+		}
+		user_queue.put(update_data)
+	except Exception as e:
+		# Silently fail to not disrupt existing functionality
+		pass
+
+def cleanup_user_queue(user_id):
+	"""Clean up queue when user disconnects"""
+	with queue_lock:
+		if user_id in user_queues:
+			del user_queues[user_id]
+
+@main_bp.get("/api/realtime/balance/<int:user_id>")
+@login_required
+def realtime_balance_updates(user_id):
+	"""Server-Sent Events endpoint for real-time balance updates"""
+	# Only allow users to get their own updates or admins/managers to get any
+	if current_user.id != user_id and current_user.role not in [Role.ADMIN, Role.MANAGER]:
+		return jsonify({"error": "Unauthorized"}), 403
+	
+	def generate():
+		user_queue = get_user_queue(user_id)
+		try:
+			while True:
+				try:
+					# Wait for updates with timeout
+					update_data = user_queue.get(timeout=30)
+					yield f"data: {json.dumps(update_data)}\n\n"
+				except queue.Empty:
+					# Send keepalive
+					yield f"data: {json.dumps({'type': 'keepalive', 'timestamp': time.time()})}\n\n"
+		except GeneratorExit:
+			# Clean up when client disconnects
+			cleanup_user_queue(user_id)
+	
+	return Response(generate(), mimetype='text/event-stream', headers={
+		'Cache-Control': 'no-cache',
+		'Connection': 'keep-alive',
+		'Access-Control-Allow-Origin': '*',
+		'Access-Control-Allow-Headers': 'Cache-Control'
+	})
 
 

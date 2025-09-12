@@ -80,6 +80,154 @@
             <button class="logout-btn">Logout</button>
         </form>
     </div>
+
+    <!-- Real-time balance updates (optional feature) -->
+    <script>
+        // Real-time balance update system
+        let eventSource = null;
+        let balanceElement = null;
+        
+        function initRealTimeUpdates() {
+            // Only run for authenticated users
+            if (typeof current_user === 'undefined' || !current_user || !current_user.id) {
+                return;
+            }
+            
+            // Find the balance element more reliably
+            const paragraphs = document.querySelectorAll('p');
+            balanceElement = null;
+            for (let p of paragraphs) {
+                if (p.textContent.includes('Balance:')) {
+                    balanceElement = p;
+                    break;
+                }
+            }
+            
+            if (!balanceElement) {
+                console.log('Real-time updates: Balance element not found');
+                return;
+            }
+            
+            try {
+                // Create Server-Sent Events connection
+                eventSource = new EventSource(`/api/realtime/balance/${current_user.id}`);
+                
+                eventSource.onmessage = function(event) {
+                    try {
+                        const data = JSON.parse(event.data);
+                        
+                        if (data.type === 'balance_update') {
+                            updateBalanceDisplay(data.new_balance, data.change_amount, data.reason);
+                        } else if (data.type === 'keepalive') {
+                            // Connection is alive
+                            console.log('Real-time connection alive');
+                        }
+                    } catch (e) {
+                        console.log('Real-time update: Error parsing data', e);
+                    }
+                };
+                
+                eventSource.onerror = function(event) {
+                    console.log('Real-time updates: Connection error, will retry automatically');
+                };
+                
+                eventSource.onopen = function(event) {
+                    console.log('Real-time updates: Connected successfully');
+                };
+                
+            } catch (e) {
+                console.log('Real-time updates: Not supported or error', e);
+            }
+        }
+        
+        function updateBalanceDisplay(newBalance, changeAmount, reason) {
+            if (!balanceElement) return;
+            
+            // Update the balance text
+            balanceElement.innerHTML = `Balance: <strong>${newBalance}</strong>`;
+            
+            // Show a notification
+            showBalanceNotification(changeAmount, reason);
+        }
+        
+        function showBalanceNotification(changeAmount, reason) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${changeAmount > 0 ? '#28a745' : '#dc3545'};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                z-index: 1000;
+                font-weight: bold;
+                max-width: 300px;
+                animation: slideIn 0.3s ease-out;
+            `;
+            
+            const changeText = changeAmount > 0 ? `+${changeAmount}` : `${changeAmount}`;
+            const reasonText = reason === 'manager_deduct' ? 'Tokens deducted by manager' : 
+                             reason === 'manager_add' ? 'Tokens added by manager' :
+                             reason === 'admin_update' ? 'Balance updated by admin' : 'Balance updated';
+            
+            notification.innerHTML = `
+                <div style="font-size: 18px; margin-bottom: 5px;">
+                    ${changeAmount > 0 ? '💰' : '💸'} ${changeText} tokens
+                </div>
+                <div style="font-size: 14px; opacity: 0.9;">
+                    ${reasonText}
+                </div>
+            `;
+            
+            // Add CSS animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 4 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.style.animation = 'slideIn 0.3s ease-out reverse';
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.parentNode.removeChild(notification);
+                        }
+                    }, 300);
+                }
+            }, 4000);
+        }
+        
+        function cleanupRealTimeUpdates() {
+            if (eventSource) {
+                eventSource.close();
+                eventSource = null;
+            }
+        }
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get user ID from the template
+            const userId = {{ current_user.id if current_user.is_authenticated else 'null' }};
+            if (userId) {
+                // Set global variable for the real-time system
+                window.current_user = { id: userId };
+                initRealTimeUpdates();
+            }
+        });
+        
+        // Cleanup when page unloads
+        window.addEventListener('beforeunload', cleanupRealTimeUpdates);
+    </script>
 </body>
 </html>
 

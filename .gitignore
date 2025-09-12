@@ -8,6 +8,9 @@
 .env.production
 .env.staging
 
+# Test files (not needed in production)
+test_realtime.py
+
 # Python
 __pycache__/
 *.py[cod]
