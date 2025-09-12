@@ -5,6 +5,17 @@
     <title>Manager Dashboard</title>
     <link rel="stylesheet" href="/static/css/main.css">
     <script src="/static/js/manager.js" defer></script>
+    <style>
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .btn:disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+    </style>
 </head>
 <body class="enhanced-landing manager-page">
     <div class="bg-decor">
@@ -56,13 +67,19 @@
     <div class="card glass">
         <h3>📱 QR Code Scanner</h3>
         
-        <div id="qr-reader" style="width: 100%; max-width: 360px; margin: 10px auto; border: 2px dashed rgba(255,255,255,0.25); min-height: 220px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.06); border-radius: 12px;">
-            <p style="color: #cbd5e1; text-align: center;">Scanner idle</p>
+        <div id="qr-reader" style="width: 100%; max-width: 360px; margin: 10px auto; border: 2px dashed rgba(255,255,255,0.25); min-height: 220px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.06); border-radius: 12px; position: relative;">
+            <p style="color: #cbd5e1; text-align: center;">Scanner idle - Click 'Start Scanner' to begin</p>
         </div>
         
         <div style="margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: center;">
-            <button onclick="startScanner()" class="btn btn-primary">Start Scanner</button>
-            <button onclick="stopScanner()" class="btn btn-secondary">Stop Scanner</button>
+            <button onclick="startScanner()" class="btn btn-primary" id="start-btn">📷 Start Scanner</button>
+            <button onclick="stopScanner()" class="btn btn-secondary" id="stop-btn">⏹️ Stop Scanner</button>
+        </div>
+        
+        <div style="margin-top: 8px; text-align: center;">
+            <small style="color: #cbd5e1; font-size: 0.9em;">
+                💡 The scanner will keep running until you press 'Stop Scanner'
+            </small>
         </div>
         
     </div>
@@ -120,6 +137,28 @@
                     }
                 });
             }
+            
+            // Update button states based on scanner status
+            function updateButtonStates() {
+                const startBtn = document.getElementById('start-btn');
+                const stopBtn = document.getElementById('stop-btn');
+                
+                if (typeof isScanning !== 'undefined' && isScanning) {
+                    startBtn.disabled = true;
+                    startBtn.textContent = '📷 Scanning...';
+                    stopBtn.disabled = false;
+                    stopBtn.textContent = '⏹️ Stop Scanner';
+                } else {
+                    startBtn.disabled = false;
+                    startBtn.textContent = '📷 Start Scanner';
+                    stopBtn.disabled = true;
+                    stopBtn.textContent = '⏹️ Stop Scanner';
+                }
+            }
+            
+            // Check scanner status every second
+            setInterval(updateButtonStates, 1000);
+            updateButtonStates(); // Initial update
         });
     </script>
 

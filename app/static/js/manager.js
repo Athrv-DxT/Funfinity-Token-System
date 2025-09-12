@@ -161,6 +161,12 @@ function startHtml5QrcodeScanner() {
         return;
     }
     
+    // Prevent multiple scanner instances
+    if (isScanning) {
+        console.log('Scanner already running, ignoring start request');
+        return;
+    }
+    
     // Create scanner element
     const scannerElement = document.createElement('div');
     scannerElement.id = 'html5-qrcode-scanner';
@@ -232,8 +238,10 @@ function startHtml5QrcodeScanner() {
                 handleQRScan(decodedText);
             },
             (error) => {
-                // Silent error handling - don't spam console
-                console.log('Scanner error (normal):', error);
+                // Only log errors that are not normal scanning errors
+                if (error && !error.includes('No QR code found') && !error.includes('NotFoundException')) {
+                    console.log('Scanner error:', error);
+                }
             }
         ).then(() => {
             console.log('Html5Qrcode scanner started successfully');
@@ -241,11 +249,34 @@ function startHtml5QrcodeScanner() {
             
             // Wait a moment for the video to render, then clear loading message
             setTimeout(() => {
-                scannerElement.innerHTML = '';
-                console.log('Scanner video should now be visible');
+                const video = scannerElement.querySelector('video');
+                if (video) {
+                    scannerElement.innerHTML = '';
+                    scannerElement.appendChild(video);
+                    console.log('Scanner video should now be visible');
+                }
             }, 1000);
             
             showMessage('📷 QR Scanner Ready! Point camera at QR code', 'success');
+            
+            // Add a status indicator to show scanner is active
+            const statusIndicator = document.createElement('div');
+            statusIndicator.id = 'scanner-status';
+            statusIndicator.style.cssText = `
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background: #28a745;
+                color: white;
+                padding: 5px 10px;
+                border-radius: 15px;
+                font-size: 12px;
+                font-weight: bold;
+                z-index: 10;
+            `;
+            statusIndicator.textContent = 'SCANNING';
+            scannerElement.appendChild(statusIndicator);
+            
         }).catch(err => {
             console.error(`Camera config ${currentConfigIndex + 1} failed:`, err.message);
             currentConfigIndex++;
@@ -336,7 +367,9 @@ function handleQRScan(qrData) {
         }
     }
     
-    // Keep scanning until Stop pressed (no auto-restart/stop here)
+    // IMPORTANT: Do NOT stop the scanner after scanning
+    // The scanner should continue running until manually stopped
+    console.log('QR scanned, continuing to scan...');
 }
 
 // Manual QR input for testing
@@ -381,17 +414,54 @@ function stopCamera() {
         scanner.stop().then(() => {
             console.log('Scanner stopped');
             isScanning = false;
+            
+            // Clear the scanner container and show idle state
+            const scannerContainer = document.getElementById('qr-reader');
+            if (scannerContainer) {
+                scannerContainer.innerHTML = '<p style="color:#cbd5e1; text-align: center;">Scanner stopped</p>';
+            }
+            
+            showMessage('📷 QR Scanner Stopped', 'info');
         }).catch(err => {
             console.error('Error stopping scanner:', err);
+            // Force reset even if stop fails
+            isScanning = false;
+            const scannerContainer = document.getElementById('qr-reader');
+            if (scannerContainer) {
+                scannerContainer.innerHTML = '<p style="color:#cbd5e1; text-align: center;">Scanner stopped</p>';
+            }
         });
+    } else {
+        // If scanner is not running, just show the idle state
+        const scannerContainer = document.getElementById('qr-reader');
+        if (scannerContainer) {
+            scannerContainer.innerHTML = '<p style="color:#cbd5e1; text-align: center;">Scanner idle</p>';
+        }
+        showMessage('📷 QR Scanner is not running', 'info');
     }
 }
 
 // Explicit controls used by UI buttons
 function startScanner(){
+    if (isScanning) {
+        showMessage('📷 Scanner is already running!', 'warning');
+        return;
+    }
+    
+    // Clear any existing scanner
+    if (scanner) {
+        scanner = null;
+    }
+    
     startHtml5QrcodeScanner();
 }
+
 function stopScanner(){
+    if (!isScanning) {
+        showMessage('📷 Scanner is not running!', 'warning');
+        return;
+    }
+    
     stopCamera();
 }
 
@@ -439,12 +509,8 @@ document.addEventListener('DOMContentLoaded', function() {
         initQRScanner();
     }
     
-    // Handle page visibility change
-    document.addEventListener('visibilitychange', () => {
-        if (document.hidden && isScanning) {
-            stopCamera();
-        }
-    });
+    // Note: Removed automatic stopping on page visibility change
+    // Scanner will now continue running until manually stopped
 });
 
 

@@ -21,7 +21,6 @@ def send_credentials_email(to_email: str, username: str, password: str) -> None:
 	smtp_host = current_app.config["SMTP_HOST"]
 	smtp_port = current_app.config["SMTP_PORT"]
 	smtp_user = current_app.config.get("SMTP_USER")
- 
 	smtp_pass = current_app.config.get("SMTP_PASS")
 
 	# Use SSL for port 465, TLS for other ports

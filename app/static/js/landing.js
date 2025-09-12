@@ -45,3 +45,4 @@
 		btn.addEventListener('click', function(){ setActiveTab(btn.getAttribute('data-tab')); });
 	});
 })();
+

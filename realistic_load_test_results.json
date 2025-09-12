@@ -1,18 +1,18 @@
 {
   "test_summary": {
-    "total_users": 150,
-    "light_users": 45,
-    "active_users": 105,
-    "successful_users": 150,
-    "failed_users": 0,
-    "success_rate": 100.0,
-    "total_test_time": 14.743018627166748,
-    "total_requests": 510,
-    "requests_per_second": 34.59264434898226
+    "total_users": 500,
+    "light_users": 150,
+    "active_users": 350,
+    "successful_users": 494,
+    "failed_users": 6,
+    "success_rate": 98.8,
+    "total_test_time": 28.737669467926025,
+    "total_requests": 1700,
+    "requests_per_second": 59.15580600220076
   },
   "light_users": {
-    "count": 45,
-    "successful": 45,
+    "count": 150,
+    "successful": 150,
     "failed": 0,
     "success_rate": 100.0,
     "avg_response_time": 0.1,
@@ -20,21 +20,21 @@
     "p95_response_time": 0.1
   },
   "active_users": {
-    "count": 105,
-    "successful": 105,
-    "failed": 0,
-    "success_rate": 100.0,
-    "avg_response_time": 1.9695826939174108,
-    "median_response_time": 0.8714227676391602,
-    "p95_response_time": 7.618234395980835
+    "count": 350,
+    "successful": 344,
+    "failed": 6,
+    "success_rate": 98.28571428571429,
+    "avg_response_time": 4.868819474152156,
+    "median_response_time": 1.2484683990478516,
+    "p95_response_time": 22.343316555023193
   },
   "overall_response_times": {
     "min": 0.1,
-    "max": 10.170137166976929,
-    "average": 1.6396563361672793,
-    "median": 0.6726824045181274,
-    "p95": 7.318429946899414,
-    "p99": 8.913440465927124
+    "max": 26.705851793289185,
+    "average": 4.027263096360599,
+    "median": 1.0490795373916626,
+    "p95": 21.216620445251465,
+    "p99": 25.545279264450073
   },
-  "performance_rating": "GOOD - Great for production"
+  "performance_rating": "POOR - Needs optimization"
 }
