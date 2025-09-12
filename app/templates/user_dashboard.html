@@ -42,7 +42,7 @@
             {% endif %}
         {% endwith %}
         
-        <p>Balance: <strong>{{ balance }}</strong></p>
+        <p id="user-balance">Balance: <strong>{{ balance }}</strong></p>
         {% if qr_data_uri %}
         <div class="qr-card" style="margin-bottom:12px;">
             <img src="{{ qr_data_uri }}" alt="Your QR" style="max-width:280px;" loading="lazy">
@@ -93,13 +93,17 @@
                 return;
             }
             
-            // Find the balance element more reliably
-            const paragraphs = document.querySelectorAll('p');
-            balanceElement = null;
-            for (let p of paragraphs) {
-                if (p.textContent.includes('Balance:')) {
-                    balanceElement = p;
-                    break;
+            // Find the balance element by ID (most reliable)
+            balanceElement = document.getElementById('user-balance');
+            
+            // Fallback: search by text content
+            if (!balanceElement) {
+                const paragraphs = document.querySelectorAll('p');
+                for (let p of paragraphs) {
+                    if (p.textContent.includes('Balance:')) {
+                        balanceElement = p;
+                        break;
+                    }
                 }
             }
             
@@ -115,8 +119,10 @@
                 eventSource.onmessage = function(event) {
                     try {
                         const data = JSON.parse(event.data);
+                        console.log('Real-time data received:', data);
                         
                         if (data.type === 'balance_update') {
+                            console.log('Processing balance update:', data);
                             updateBalanceDisplay(data.new_balance, data.change_amount, data.reason);
                         } else if (data.type === 'keepalive') {
                             // Connection is alive
@@ -143,11 +149,16 @@
         function updateBalanceDisplay(newBalance, changeAmount, reason) {
             if (!balanceElement) return;
             
-            // Update the balance text
+            // Update the balance text - preserve the exact structure
             balanceElement.innerHTML = `Balance: <strong>${newBalance}</strong>`;
+            
+            // Also update the page title to show new balance
+            document.title = `Your Wallet - ${newBalance} tokens`;
             
             // Show a notification
             showBalanceNotification(changeAmount, reason);
+            
+            console.log(`Balance updated to: ${newBalance} (change: ${changeAmount})`);
         }
         
         function showBalanceNotification(changeAmount, reason) {
@@ -227,6 +238,12 @@
         
         // Cleanup when page unloads
         window.addEventListener('beforeunload', cleanupRealTimeUpdates);
+        
+        // Test function (can be called from browser console)
+        window.testBalanceUpdate = function(newBalance, changeAmount) {
+            console.log('Testing balance update...');
+            updateBalanceDisplay(newBalance, changeAmount, 'test');
+        };
     </script>
 </body>
 </html>
