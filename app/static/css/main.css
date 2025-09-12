@@ -64,8 +64,11 @@ a.btn.secondary { background:#fde047; }
 /* User Dashboard */
 .page-user { color:#fff; min-height:100vh; }
 .user-wrap { max-width:620px; margin:20px auto; padding:16px; text-align:center; }
+.balance-display { margin: 20px 0; }
+.balance-display p { font-size: 20px; margin: 0; padding: 16px 20px; background: rgba(255,255,255,0.1); border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); display: inline-block; }
 .qr-card { background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.18); border-radius:12px; padding:16px; display:inline-block; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
-.logout-btn { padding:10px 14px; border-radius:10px; border:none; font-weight:bold; }
+.logout-btn { padding:10px 14px; border-radius:10px; border:none; font-weight:bold; background: #dc3545; color: white; cursor: pointer; transition: all 0.2s; }
+.logout-btn:hover { background: #c82333; transform: translateY(-1px); }
 
 /* Agenda and Menu styles */
 .agenda-card { margin: 16px auto; padding: 18px; max-width: 760px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.18); border-radius: 16px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 18px 38px rgba(0,0,0,0.35); }
@@ -779,6 +782,190 @@ ul li {
     .card {
         margin: 12px 0;
         padding: 16px;
+    }
+}
+
+/* Mobile User Dashboard Styles */
+@media (max-width: 768px) {
+    .page-user {
+        padding: 0;
+        margin: 0;
+    }
+    
+    .user-wrap {
+        max-width: 100%;
+        margin: 0;
+        padding: 12px;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+    }
+    
+    .user-wrap h2 {
+        font-size: 24px;
+        margin: 16px 0 20px 0;
+        color: #e5e7eb;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .qr-card {
+        width: 100%;
+        max-width: 280px;
+        margin: 0 auto 16px auto;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+    
+    .qr-card img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+    }
+    
+    .qr-caption {
+        font-size: 16px;
+        margin: 12px 0 20px 0;
+        padding: 8px 16px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 20px;
+        display: inline-block;
+    }
+    
+    .agenda-card {
+        margin: 16px 0;
+        padding: 16px;
+        max-width: 100%;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .agenda-title {
+        font-size: 18px;
+        margin-bottom: 12px;
+    }
+    
+    .menu-title {
+        font-size: 14px;
+        margin-bottom: 16px;
+    }
+    
+    .games-grid {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 8px;
+        margin: 16px 0;
+    }
+    
+    .games-grid li {
+        padding: 10px 8px;
+        font-size: 13px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        line-height: 1.3;
+    }
+    
+    .logout-btn {
+        width: 100%;
+        max-width: 200px;
+        margin: 20px auto 0 auto;
+        padding: 14px 20px;
+        font-size: 16px;
+        display: block;
+    }
+    
+    /* Balance display */
+    .balance-display {
+        margin: 16px 0;
+    }
+    
+    .balance-display p {
+        font-size: 18px;
+        padding: 12px 16px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.2);
+        display: inline-block;
+        margin: 0;
+    }
+    
+    /* Flash messages mobile */
+    .flash-message {
+        margin: 12px 0;
+        padding: 12px 16px;
+        font-size: 14px;
+        border-radius: 8px;
+    }
+}
+
+/* Extra small mobile devices */
+@media (max-width: 480px) {
+    .user-wrap {
+        padding: 8px;
+    }
+    
+    .user-wrap h2 {
+        font-size: 20px;
+        margin: 12px 0 16px 0;
+    }
+    
+    .qr-card {
+        padding: 16px;
+        margin-bottom: 12px;
+    }
+    
+    .agenda-card {
+        padding: 12px;
+        margin: 12px 0;
+    }
+    
+    .agenda-title {
+        font-size: 16px;
+    }
+    
+    .games-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 6px;
+    }
+    
+    .games-grid li {
+        padding: 8px 6px;
+        font-size: 12px;
+        min-height: 40px;
+    }
+    
+    .logout-btn {
+        padding: 12px 16px;
+        font-size: 15px;
+    }
+    
+    .balance-display p {
+        font-size: 16px;
+        padding: 10px 12px;
+    }
+}
+
+/* Landscape mobile orientation */
+@media (max-width: 768px) and (orientation: landscape) {
+    .user-wrap {
+        padding: 8px 16px;
+    }
+    
+    .qr-card {
+        max-width: 200px;
+        padding: 12px;
+    }
+    
+    .agenda-card {
+        margin: 12px 0;
+        padding: 12px;
+    }
+    
+    .games-grid {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 6px;
     }
 }
 
