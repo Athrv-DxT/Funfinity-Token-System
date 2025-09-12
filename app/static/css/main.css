@@ -61,12 +61,224 @@ a.btn.secondary { background:#fde047; }
   .auth-glass { margin: 0 8px; }
 }
 
+/* Dynamic Doodle Animation */
+.doodle-container {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin: 40px auto 0 auto;
+    opacity: 0.6;
+}
+
+.doodle-animation {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    animation: doodleFloat 8s ease-in-out infinite;
+}
+
+.doodle-circle {
+    position: absolute;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    animation: doodleRotate 6s linear infinite;
+}
+
+.circle-1 {
+    width: 80px;
+    height: 80px;
+    top: 20px;
+    left: 20px;
+    animation-delay: 0s;
+}
+
+.circle-2 {
+    width: 60px;
+    height: 60px;
+    top: 60px;
+    left: 80px;
+    animation-delay: -2s;
+}
+
+.circle-3 {
+    width: 40px;
+    height: 40px;
+    top: 100px;
+    left: 40px;
+    animation-delay: -4s;
+}
+
+.doodle-line {
+    position: absolute;
+    background: rgba(255,255,255,0.2);
+    animation: doodlePulse 3s ease-in-out infinite;
+}
+
+.line-1 {
+    width: 100px;
+    height: 2px;
+    top: 50px;
+    left: 50px;
+    transform: rotate(45deg);
+    animation-delay: 0s;
+}
+
+.line-2 {
+    width: 80px;
+    height: 2px;
+    top: 80px;
+    left: 60px;
+    transform: rotate(-30deg);
+    animation-delay: -1s;
+}
+
+.line-3 {
+    width: 60px;
+    height: 2px;
+    top: 120px;
+    left: 70px;
+    transform: rotate(60deg);
+    animation-delay: -2s;
+}
+
+.doodle-dot {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: rgba(255,255,255,0.4);
+    border-radius: 50%;
+    animation: doodleBounce 2s ease-in-out infinite;
+}
+
+.dot-1 {
+    top: 30px;
+    left: 150px;
+    animation-delay: 0s;
+}
+
+.dot-2 {
+    top: 70px;
+    left: 10px;
+    animation-delay: -0.5s;
+}
+
+.dot-3 {
+    top: 110px;
+    left: 160px;
+    animation-delay: -1s;
+}
+
+.dot-4 {
+    top: 150px;
+    left: 30px;
+    animation-delay: -1.5s;
+}
+
+@keyframes doodleFloat {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    25% { transform: translateY(-10px) rotate(1deg); }
+    50% { transform: translateY(-5px) rotate(0deg); }
+    75% { transform: translateY(-15px) rotate(-1deg); }
+}
+
+@keyframes doodleRotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes doodlePulse {
+    0%, 100% { opacity: 0.2; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.1); }
+}
+
+@keyframes doodleBounce {
+    0%, 100% { transform: translateY(0px); opacity: 0.4; }
+    50% { transform: translateY(-20px); opacity: 0.8; }
+}
+
+/* Mobile doodle adjustments */
+@media (max-width: 768px) {
+    .doodle-container {
+        width: 150px;
+        height: 150px;
+        margin: 30px auto 0 auto;
+    }
+    
+    .circle-1 {
+        width: 60px;
+        height: 60px;
+        top: 15px;
+        left: 15px;
+    }
+    
+    .circle-2 {
+        width: 45px;
+        height: 45px;
+        top: 45px;
+        left: 60px;
+    }
+    
+    .circle-3 {
+        width: 30px;
+        height: 30px;
+        top: 75px;
+        left: 30px;
+    }
+    
+    .doodle-line {
+        height: 1px;
+    }
+    
+    .line-1 {
+        width: 75px;
+        top: 37px;
+        left: 37px;
+    }
+    
+    .line-2 {
+        width: 60px;
+        top: 60px;
+        left: 45px;
+    }
+    
+    .line-3 {
+        width: 45px;
+        top: 90px;
+        left: 52px;
+    }
+    
+    .doodle-dot {
+        width: 6px;
+        height: 6px;
+    }
+    
+    .dot-1 {
+        top: 22px;
+        left: 112px;
+    }
+    
+    .dot-2 {
+        top: 52px;
+        left: 7px;
+    }
+    
+    .dot-3 {
+        top: 82px;
+        left: 120px;
+    }
+    
+    .dot-4 {
+        top: 112px;
+        left: 22px;
+    }
+}
+
 /* User Dashboard */
 .page-user { color:#fff; min-height:100vh; }
 .user-wrap { max-width:620px; margin:20px auto; padding:16px; text-align:center; }
 .balance-display { margin: 20px 0; }
 .balance-display p { font-size: 20px; margin: 0; padding: 16px 20px; background: rgba(255,255,255,0.1); border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); display: inline-block; }
-.qr-card { background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.18); border-radius:12px; padding:16px; display:inline-block; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.qr-card { background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.18); border-radius:12px; padding:16px; display:inline-block; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); text-align: center; }
 .logout-btn { padding:10px 14px; border-radius:10px; border:none; font-weight:bold; background: #dc3545; color: white; cursor: pointer; transition: all 0.2s; }
 .logout-btn:hover { background: #c82333; transform: translateY(-1px); }
 
@@ -815,12 +1027,17 @@ ul li {
         margin: 0 auto 16px auto;
         padding: 20px;
         box-sizing: border-box;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
     
     .qr-card img {
         max-width: 100%;
         height: auto;
         border-radius: 8px;
+        display: block;
+        margin: 0 auto;
     }
     
     .qr-caption {
