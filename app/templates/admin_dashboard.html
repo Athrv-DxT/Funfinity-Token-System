@@ -252,6 +252,11 @@
                 <div class="nav-title">Delete User</div>
                 <div class="nav-desc">Remove users from system</div>
             </div>
+            <div class="nav-card" onclick="showSection('create-admin', this)">
+                <div class="nav-icon">👑</div>
+                <div class="nav-title">Create Admin</div>
+                <div class="nav-desc">Add new admin users</div>
+            </div>
             <div class="nav-card" onclick="window.location.href='/admin/download-credentials'">
                 <div class="nav-icon">📥</div>
                 <div class="nav-title">Download Credentials</div>
@@ -355,6 +360,42 @@
                 • All wallet transactions will be removed<br>
                 • QR code files will be deleted<br>
                 • You cannot delete your own account<br>
+                • This action is logged for audit purposes
+            </div>
+        </div>
+
+        <!-- Create Admin Section -->
+        <div id="create-admin-section" class="content-section" style="display: none;">
+            <h3>👑 Create New Admin</h3>
+            <p>Create a new admin user with full system access. Only existing admins can create new admins.</p>
+            <form method="post" action="/admin/create-admin" id="create-admin-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="admin-username">Username:</label>
+                        <input type="text" id="admin-username" name="username" required 
+                               placeholder="Enter admin username" minlength="3">
+                    </div>
+                    <div class="form-group">
+                        <label for="admin-email">Email:</label>
+                        <input type="email" id="admin-email" name="email" required 
+                               placeholder="Enter admin email">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="admin-password">Password:</label>
+                    <input type="password" id="admin-password" name="password" required 
+                           placeholder="Enter admin password (min 6 characters)" minlength="6">
+                </div>
+                <button type="submit" class="btn btn-success">
+                    👑 Create Admin
+                </button>
+            </form>
+            <div style="margin-top: 20px; padding: 15px; background: #d1ecf1; border-radius: 5px; border: 1px solid #bee5eb;">
+                <strong>ℹ️ Admin Creation Info:</strong><br>
+                • New admin will have full system access<br>
+                • Username must be unique and at least 3 characters<br>
+                • Email must be unique and valid<br>
+                • Password must be at least 6 characters<br>
                 • This action is logged for audit purposes
             </div>
         </div>

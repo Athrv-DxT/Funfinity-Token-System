@@ -240,6 +240,62 @@ def admin_set_role():
 	return redirect(url_for("main.dashboard"))
 
 
+@main_bp.post("/admin/create-admin")
+@login_required
+def admin_create_admin():
+	"""Create a new admin user - only existing admins can do this"""
+	if current_user.role != Role.ADMIN:
+		flash("Unauthorized", "danger")
+		return redirect(url_for("main.dashboard"))
+	
+	from werkzeug.security import generate_password_hash
+	
+	username = request.form.get("username", "").strip()
+	email = request.form.get("email", "").strip()
+	password = request.form.get("password", "").strip()
+	
+	# Validation
+	if not username or not email or not password:
+		flash("All fields are required", "danger")
+		return redirect(url_for("main.dashboard"))
+	
+	if len(password) < 6:
+		flash("Password must be at least 6 characters long", "danger")
+		return redirect(url_for("main.dashboard"))
+	
+	# Check if username already exists
+	if User.query.filter_by(username=username).first():
+		flash("Username already exists", "danger")
+		return redirect(url_for("main.dashboard"))
+	
+	# Check if email already exists
+	if User.query.filter_by(email=email).first():
+		flash("Email already exists", "danger")
+		return redirect(url_for("main.dashboard"))
+	
+	# Create new admin
+	try:
+		new_admin = User(
+			username=username,
+			email=email,
+			password_hash=generate_password_hash(password),
+			role=Role.ADMIN,
+			balance=0.0
+		)
+		db.session.add(new_admin)
+		db.session.commit()
+		
+		flash(f"Admin '{username}' created successfully", "success")
+		log_event("admin_created", resource=username, meta=f"created_by={current_user.username}")
+		
+	except Exception as e:
+		db.session.rollback()
+		flash(f"Error creating admin: {str(e)}", "danger")
+		print(f"DEBUG: Error creating admin: {e}")
+	
+	return redirect(url_for("main.dashboard"))
+
+
 @main_bp.post("/admin/bulk-import")
 @login_required
 def admin_bulk_import():
