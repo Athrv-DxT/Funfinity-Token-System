@@ -7,11 +7,12 @@ from flask import current_app
 
 
 def send_credentials_email(to_email: str, username: str, password: str) -> None:
-	subject = "Your Account Credentials"
+	subject = "Your Account Credentials for FUNFINITY 2.0"
 	body = (
-		"Please find your credentials\n\n"
+		"Please find your credentials to login to the token wallet\n\n"
 		f"username: {username}\n"
-		f"password: {password}\n"
+		f"password: {password}\n\n"
+		"Access your wallet at: https://web-production-3b67.up.railway.app/\n"
 	)
 	msg = MIMEText(body)
 	msg["Subject"] = subject
