@@ -222,3 +222,90 @@
 	});
 })();
 
+// Greeting Text Interactive Effects
+(function(){
+	const greetingText = document.getElementById('greetingText');
+	if (!greetingText) return;
+	
+	// Add hover effect
+	greetingText.addEventListener('mouseenter', function() {
+		this.style.transform = 'scale(1.1)';
+		this.style.transition = 'transform 0.3s ease';
+	});
+	
+	greetingText.addEventListener('mouseleave', function() {
+		this.style.transform = 'scale(1)';
+	});
+	
+	// Add click effect with color burst
+	greetingText.addEventListener('click', function() {
+		// Create color burst effect
+		const burst = document.createElement('div');
+		burst.style.cssText = `
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			width: 0;
+			height: 0;
+			border: 3px solid rgba(255,255,255,0.8);
+			border-radius: 50%;
+			transform: translate(-50%, -50%);
+			animation: colorBurst 1.5s ease-out;
+			pointer-events: none;
+			z-index: 1000;
+		`;
+		
+		// Add burst animation
+		const style = document.createElement('style');
+		style.textContent = `
+			@keyframes colorBurst {
+				0% { 
+					width: 0; 
+					height: 0; 
+					opacity: 1; 
+					border-color: rgba(255,255,255,0.8);
+				}
+				50% { 
+					width: 300px; 
+					height: 300px; 
+					opacity: 0.6; 
+					border-color: rgba(78,205,196,0.6);
+				}
+				100% { 
+					width: 500px; 
+					height: 500px; 
+					opacity: 0; 
+					border-color: rgba(69,183,209,0.2);
+				}
+			}
+		`;
+		document.head.appendChild(style);
+		
+		document.body.appendChild(burst);
+		
+		setTimeout(() => {
+			if (burst.parentNode) {
+				burst.parentNode.removeChild(burst);
+			}
+		}, 1500);
+		
+		// Temporarily speed up color animation
+		this.style.animationDuration = '0.5s';
+		setTimeout(() => {
+			this.style.animationDuration = '';
+		}, 2000);
+	});
+	
+	// Add random color change on scroll
+	let scrollTimeout;
+	window.addEventListener('scroll', function() {
+		clearTimeout(scrollTimeout);
+		scrollTimeout = setTimeout(() => {
+			greetingText.style.animationDuration = '0.8s';
+			setTimeout(() => {
+				greetingText.style.animationDuration = '';
+			}, 1000);
+		}, 100);
+	});
+})();
+
