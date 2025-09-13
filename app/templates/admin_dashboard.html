@@ -422,6 +422,8 @@
         setInterval(refreshDbBadge, 30000);
         document.addEventListener('DOMContentLoaded', refreshDbBadge);
         function showSection(sectionName, clickedElement = null) {
+            console.log('showSection called with:', sectionName);
+            
             // Hide all sections
             document.querySelectorAll('.content-section').forEach(section => {
                 section.classList.remove('active');
@@ -433,7 +435,14 @@
             });
             
             // Show selected section
-            document.getElementById(sectionName + '-section').classList.add('active');
+            const targetSection = document.getElementById(sectionName + '-section');
+            console.log('Target section found:', targetSection);
+            if (targetSection) {
+                targetSection.classList.add('active');
+                console.log('Section activated');
+            } else {
+                console.error('Section not found:', sectionName + '-section');
+            }
             
             // Add active class to clicked nav card if provided
             if (clickedElement) {
