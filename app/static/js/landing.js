@@ -222,90 +222,200 @@
 	});
 })();
 
-// Greeting Text Interactive Effects
+// Elegant Greeting Text Interactive Effects
 (function(){
 	const greetingText = document.getElementById('greetingText');
 	if (!greetingText) return;
 	
-	// Add hover effect
+	let isHovered = false;
+	let clickCount = 0;
+	
+	// Enhanced hover effect with smooth transitions
 	greetingText.addEventListener('mouseenter', function() {
-		this.style.transform = 'scale(1.1)';
-		this.style.transition = 'transform 0.3s ease';
+		isHovered = true;
+		this.style.transform = 'translateY(-5px) scale(1.05)';
+		this.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+		this.style.filter = 'brightness(1.2) saturate(1.3)';
 	});
 	
 	greetingText.addEventListener('mouseleave', function() {
-		this.style.transform = 'scale(1)';
+		isHovered = false;
+		this.style.transform = 'translateY(0px) scale(1)';
+		this.style.filter = 'brightness(1) saturate(1)';
 	});
 	
-	// Add click effect with color burst
+	// Enhanced click effect with multiple animations
 	greetingText.addEventListener('click', function() {
-		// Create color burst effect
-		const burst = document.createElement('div');
-		burst.style.cssText = `
-			position: absolute;
-			top: 50%;
-			left: 50%;
+		clickCount++;
+		
+		// Create elegant ripple effect
+		createElegantRipple(this);
+		
+		// Create floating particles
+		createFloatingParticles(this);
+		
+		// Add text shake effect
+		this.style.animation = 'elegantShake 0.6s ease-in-out';
+		setTimeout(() => {
+			this.style.animation = '';
+		}, 600);
+		
+		// Speed up all animations temporarily
+		this.style.animationDuration = '0.3s';
+		setTimeout(() => {
+			this.style.animationDuration = '';
+		}, 2000);
+		
+		// Add special effect for multiple clicks
+		if (clickCount % 3 === 0) {
+			createSpecialEffect(this);
+		}
+	});
+	
+	// Create elegant ripple effect
+	function createElegantRipple(element) {
+		const rect = element.getBoundingClientRect();
+		const ripple = document.createElement('div');
+		ripple.style.cssText = `
+			position: fixed;
+			top: ${rect.top + rect.height/2}px;
+			left: ${rect.left + rect.width/2}px;
 			width: 0;
 			height: 0;
-			border: 3px solid rgba(255,255,255,0.8);
+			border: 2px solid rgba(255,255,255,0.6);
 			border-radius: 50%;
 			transform: translate(-50%, -50%);
-			animation: colorBurst 1.5s ease-out;
+			animation: elegantRipple 2s ease-out;
 			pointer-events: none;
 			z-index: 1000;
 		`;
 		
-		// Add burst animation
-		const style = document.createElement('style');
-		style.textContent = `
-			@keyframes colorBurst {
-				0% { 
-					width: 0; 
-					height: 0; 
-					opacity: 1; 
-					border-color: rgba(255,255,255,0.8);
-				}
-				50% { 
-					width: 300px; 
-					height: 300px; 
-					opacity: 0.6; 
-					border-color: rgba(78,205,196,0.6);
-				}
-				100% { 
-					width: 500px; 
-					height: 500px; 
-					opacity: 0; 
-					border-color: rgba(69,183,209,0.2);
-				}
-			}
-		`;
-		document.head.appendChild(style);
-		
-		document.body.appendChild(burst);
+		document.body.appendChild(ripple);
 		
 		setTimeout(() => {
-			if (burst.parentNode) {
-				burst.parentNode.removeChild(burst);
+			if (ripple.parentNode) {
+				ripple.parentNode.removeChild(ripple);
+			}
+		}, 2000);
+	}
+	
+	// Create floating particles
+	function createFloatingParticles(element) {
+		const rect = element.getBoundingClientRect();
+		const particles = ['✨', '⭐', '💫', '✨', '⭐', '🌟'];
+		
+		particles.forEach((particle, index) => {
+			setTimeout(() => {
+				const particleEl = document.createElement('div');
+				particleEl.textContent = particle;
+				particleEl.style.cssText = `
+					position: fixed;
+					left: ${rect.left + rect.width/2}px;
+					top: ${rect.top + rect.height/2}px;
+					font-size: 18px;
+					pointer-events: none;
+					animation: elegantParticleFloat 3s ease-out forwards;
+					z-index: 1000;
+				`;
+				
+				document.body.appendChild(particleEl);
+				
+				setTimeout(() => {
+					if (particleEl.parentNode) {
+						particleEl.parentNode.removeChild(particleEl);
+					}
+				}, 3000);
+			}, index * 100);
+		});
+	}
+	
+	// Create special effect for multiple clicks
+	function createSpecialEffect(element) {
+		const rect = element.getBoundingClientRect();
+		const specialEffect = document.createElement('div');
+		specialEffect.style.cssText = `
+			position: fixed;
+			top: ${rect.top}px;
+			left: ${rect.left}px;
+			width: ${rect.width}px;
+			height: ${rect.height}px;
+			background: linear-gradient(45deg, rgba(255,107,107,0.3), rgba(78,205,196,0.3), rgba(69,183,209,0.3));
+			border-radius: 20px;
+			animation: elegantSpecialEffect 1.5s ease-out;
+			pointer-events: none;
+			z-index: 999;
+		`;
+		
+		document.body.appendChild(specialEffect);
+		
+		setTimeout(() => {
+			if (specialEffect.parentNode) {
+				specialEffect.parentNode.removeChild(specialEffect);
 			}
 		}, 1500);
-		
-		// Temporarily speed up color animation
-		this.style.animationDuration = '0.5s';
-		setTimeout(() => {
-			this.style.animationDuration = '';
-		}, 2000);
-	});
+	}
 	
-	// Add random color change on scroll
-	let scrollTimeout;
-	window.addEventListener('scroll', function() {
-		clearTimeout(scrollTimeout);
-		scrollTimeout = setTimeout(() => {
-			greetingText.style.animationDuration = '0.8s';
-			setTimeout(() => {
-				greetingText.style.animationDuration = '';
-			}, 1000);
-		}, 100);
-	});
+	// Add CSS animations
+	const style = document.createElement('style');
+	style.textContent = `
+		@keyframes elegantRipple {
+			0% { 
+				width: 0; 
+				height: 0; 
+				opacity: 1; 
+				border-color: rgba(255,255,255,0.8);
+			}
+			50% { 
+				width: 200px; 
+				height: 200px; 
+				opacity: 0.6; 
+				border-color: rgba(78,205,196,0.6);
+			}
+			100% { 
+				width: 400px; 
+				height: 400px; 
+				opacity: 0; 
+				border-color: rgba(69,183,209,0.2);
+			}
+		}
+		
+		@keyframes elegantParticleFloat {
+			0% { 
+				transform: translate(0, 0) scale(1) rotate(0deg); 
+				opacity: 1; 
+			}
+			100% { 
+				transform: translate(${(Math.random() - 0.5) * 300}px, ${(Math.random() - 0.5) * 300}px) scale(0.2) rotate(720deg); 
+				opacity: 0; 
+			}
+		}
+		
+		@keyframes elegantShake {
+			0%, 100% { transform: translateX(0); }
+			25% { transform: translateX(-5px) rotate(-1deg); }
+			75% { transform: translateX(5px) rotate(1deg); }
+		}
+		
+		@keyframes elegantSpecialEffect {
+			0% { 
+				opacity: 0; 
+				transform: scale(0.8);
+			}
+			50% { 
+				opacity: 0.8; 
+				transform: scale(1.1);
+			}
+			100% { 
+				opacity: 0; 
+				transform: scale(1.3);
+			}
+		}
+	`;
+	document.head.appendChild(style);
+	
+	// Add subtle animation on page load
+	setTimeout(() => {
+		greetingText.style.animation = 'elegantFloat 3s ease-in-out infinite, elegantColorShift 4s ease-in-out infinite';
+	}, 1000);
 })();
 
